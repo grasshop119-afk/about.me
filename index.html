@@ -2,109 +2,310 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Lottie Animation</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lottie Animation Debug</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/bodymovin/5.12.2/lottie.min.js"></script>
     <style>
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            -webkit-tap-highlight-color: transparent;
         }
         
         body {
             background-color: #000000;
             height: 100vh;
             display: flex;
+            flex-direction: column;
             align-items: center;
             justify-content: center;
-            overflow: hidden;
+            font-family: Arial, sans-serif;
+            color: white;
         }
         
         #lottie-container {
             width: 300px;
             height: 300px;
-            max-width: 90vw;
-            max-height: 90vh;
+            border: 2px solid #333;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
         
-        /* Адаптация для разных экранов */
-        @media (max-width: 768px) {
-            #lottie-container {
-                width: 250px;
-                height: 250px;
-            }
+        #debug-info {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 15px;
+            border-radius: 8px;
+            max-width: 500px;
+            font-size: 14px;
+            line-height: 1.5;
         }
         
-        @media (max-width: 480px) {
-            #lottie-container {
-                width: 200px;
-                height: 200px;
-            }
+        .debug-section {
+            margin-bottom: 10px;
+        }
+        
+        .status {
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-weight: bold;
+        }
+        
+        .loading {
+            background: #ff9800;
+            color: black;
+        }
+        
+        .success {
+            background: #4caf50;
+        }
+        
+        .error {
+            background: #f44336;
+        }
+        
+        button {
+            background: #007AFF;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 6px;
+            cursor: pointer;
+            margin: 10px 5px;
+            font-size: 14px;
+        }
+        
+        button:hover {
+            opacity: 0.9;
         }
     </style>
 </head>
 <body>
-    <div id="lottie-container"></div>
+    <h2 style="margin-bottom: 20px;">Lottie Animation Debug</h2>
+    
+    <div id="lottie-container">
+        <div id="status-text">Загрузка...</div>
+    </div>
+    
+    <div id="debug-info">
+        <div class="debug-section">
+            <strong>Статус:</strong> 
+            <span id="status" class="status loading">Загрузка</span>
+        </div>
+        
+        <div class="debug-section">
+            <strong>Путь к файлу:</strong> 
+            <span id="file-path">Animations/CTree.lottie</span>
+        </div>
+        
+        <div class="debug-section">
+            <strong>Размер файла:</strong> 
+            <span id="file-size">Неизвестно</span>
+        </div>
+        
+        <div class="debug-section">
+            <strong>Lottie версия:</strong> 
+            <span id="lottie-version">Загрузка...</span>
+        </div>
+        
+        <div class="debug-section">
+            <strong>Ошибка:</strong> 
+            <span id="error-message">Нет</span>
+        </div>
+    </div>
+    
+    <div style="margin-top: 20px;">
+        <button onclick="loadAnimation()">Перезагрузить</button>
+        <button onclick="testDifferentFormats()">Тест разных форматов</button>
+        <button onclick="checkFileExists()">Проверить файл</button>
+    </div>
 
     <script>
-        // Загрузка Lottie анимации
-        const animationContainer = document.getElementById('lottie-container');
+        let currentAnimation = null;
+        const filePath = 'Animations/CTree.lottie';
         
-        // Замените 'Animations/CTree.lottie' на путь к вашему файлу
-        const animationPath = 'Animations/CTree.lottie';
+        document.getElementById('file-path').textContent = filePath;
+        document.getElementById('lottie-version').textContent = lottie.version || '5.12.2';
         
-        const anim = lottie.loadAnimation({
-            container: animationContainer,
-            renderer: 'svg', // или 'canvas'
-            loop: true,
-            autoplay: true,
-            path: animationPath // путь к Lottie файлу
-        });
-        
-        // Обработка ошибок загрузки
-        anim.addEventListener('data_failed', () => {
-            console.error('Ошибка загрузки Lottie файла');
-            animationContainer.innerHTML = `
-                <div style="color: white; text-align: center; font-family: Arial, sans-serif;">
-                    <p>Ошибка загрузки анимации</p>
-                    <p>Проверьте путь к файлу: ${animationPath}</p>
-                </div>
-            `;
-        });
-        
-        // Успешная загрузка
-        anim.addEventListener('data_ready', () => {
-            console.log('Анимация загружена успешно');
-        });
-        
-        // Дополнительные опции для управления анимацией:
-        // anim.play(); // Воспроизвести
-        // anim.pause(); // Пауза
-        // anim.stop(); // Остановить
-        // anim.setSpeed(1.5); // Изменить скорость
-        // anim.goToAndStop(50, true); // Перейти к определенному кадру
-        
-        // Управление с клавиатуры (опционально)
-        document.addEventListener('keydown', (e) => {
-            if (e.code === 'Space') {
-                if (anim.isPaused) {
-                    anim.play();
+        // Функция проверки существования файла
+        async function checkFileExists() {
+            updateStatus('Проверка файла...', 'loading');
+            
+            try {
+                const response = await fetch(filePath, { method: 'HEAD' });
+                
+                if (response.ok) {
+                    const size = response.headers.get('content-length');
+                    document.getElementById('file-size').textContent = size ? `${Math.round(size / 1024)} KB` : 'Есть (размер неизвестен)';
+                    updateStatus('Файл найден!', 'success');
+                    console.log('Файл существует:', filePath);
                 } else {
-                    anim.pause();
+                    updateStatus('Файл не найден', 'error');
+                    document.getElementById('file-size').textContent = 'Файл не найден';
                 }
+            } catch (error) {
+                updateStatus('Ошибка проверки', 'error');
+                document.getElementById('file-size').textContent = 'Ошибка сети';
+                console.error('Ошибка проверки файла:', error);
             }
+        }
+        
+        // Основная функция загрузки анимации
+        function loadAnimation() {
+            if (currentAnimation) {
+                currentAnimation.destroy();
+                currentAnimation = null;
+            }
+            
+            const container = document.getElementById('lottie-container');
+            container.innerHTML = '<div id="status-text">Загрузка...</div>';
+            
+            updateStatus('Загрузка Lottie...', 'loading');
+            document.getElementById('error-message').textContent = 'Нет';
+            
+            // Очищаем контейнер
+            const statusText = document.getElementById('status-text');
+            
+            // Пробуем загрузить как .lottie файл
+            try {
+                console.log('Попытка загрузки:', filePath);
+                
+                currentAnimation = lottie.loadAnimation({
+                    container: container,
+                    renderer: 'svg',
+                    loop: true,
+                    autoplay: true,
+                    path: filePath
+                });
+                
+                // Обработчики событий
+                currentAnimation.addEventListener('DOMLoaded', () => {
+                    console.log('DOM загружен');
+                    statusText.style.display = 'none';
+                    updateStatus('DOM загружен', 'success');
+                });
+                
+                currentAnimation.addEventListener('data_ready', () => {
+                    console.log('Данные готовы');
+                    updateStatus('Анимация готова', 'success');
+                    document.getElementById('error-message').textContent = 'Нет (успех)';
+                });
+                
+                currentAnimation.addEventListener('data_failed', (err) => {
+                    console.error('Ошибка данных:', err);
+                    updateStatus('Ошибка данных', 'error');
+                    document.getElementById('error-message').textContent = 'Ошибка загрузки данных Lottie';
+                    testDifferentFormats();
+                });
+                
+                currentAnimation.addEventListener('error', (err) => {
+                    console.error('Общая ошибка:', err);
+                    updateStatus('Ошибка', 'error');
+                    document.getElementById('error-message').textContent = err || 'Неизвестная ошибка';
+                });
+                
+                currentAnimation.addEventListener('loaded_images', () => {
+                    console.log('Изображения загружены');
+                });
+                
+            } catch (error) {
+                console.error('Ошибка при создании анимации:', error);
+                updateStatus('Ошибка инициализации', 'error');
+                document.getElementById('error-message').textContent = error.toString();
+                statusText.textContent = 'Ошибка: ' + error.message;
+            }
+        }
+        
+        // Тест разных форматов файлов
+        function testDifferentFormats() {
+            updateStatus('Тест форматов...', 'loading');
+            
+            const formats = [
+                'Animations/CTree.lottie',
+                'Animations/CTree.json',
+                'Animations/CTree.zip',
+                'Animations/CTree.gif',
+                'Animations/ctree.lottie', // lower case
+                'animations/CTree.lottie', // lower case folder
+                './Animations/CTree.lottie',
+                '/Animations/CTree.lottie'
+            ];
+            
+            console.log('Тестируем пути:');
+            formats.forEach(path => {
+                console.log('- ' + path);
+            });
+            
+            // Создаем альтернативный контейнер для теста
+            const testContainer = document.createElement('div');
+            testContainer.style.position = 'fixed';
+            testContainer.style.top = '10px';
+            testContainer.style.left = '10px';
+            testContainer.style.background = 'rgba(0,0,0,0.8)';
+            testContainer.style.padding = '10px';
+            testContainer.style.color = 'white';
+            testContainer.style.fontSize = '12px';
+            testContainer.style.zIndex = '1000';
+            testContainer.innerHTML = '<h3>Тест путей:</h3>';
+            
+            formats.forEach(path => {
+                const testItem = document.createElement('div');
+                testItem.textContent = path;
+                
+                // Проверяем каждый путь
+                fetch(path, { method: 'HEAD' })
+                    .then(response => {
+                        if (response.ok) {
+                            testItem.style.color = '#4caf50';
+                            testItem.textContent += ' ✓ НАЙДЕН';
+                        } else {
+                            testItem.style.color = '#f44336';
+                            testItem.textContent += ' ✗ 404';
+                        }
+                    })
+                    .catch(() => {
+                        testItem.style.color = '#f44336';
+                        testItem.textContent += ' ✗ ОШИБКА';
+                    });
+                
+                testContainer.appendChild(testItem);
+            });
+            
+            document.body.appendChild(testContainer);
+            
+            // Удаляем через 10 секунд
+            setTimeout(() => {
+                if (testContainer.parentNode) {
+                    testContainer.parentNode.removeChild(testContainer);
+                }
+            }, 10000);
+        }
+        
+        // Обновление статуса
+        function updateStatus(message, type) {
+            const statusElement = document.getElementById('status');
+            statusElement.textContent = message;
+            statusElement.className = 'status ' + type;
+            
+            const statusText = document.getElementById('status-text');
+            if (statusText) {
+                statusText.textContent = message;
+            }
+            
+            console.log('Статус:', message);
+        }
+        
+        // Загрузка по умолчанию
+        window.addEventListener('load', () => {
+            checkFileExists();
+            setTimeout(loadAnimation, 1000);
         });
         
-        // Клик по анимации для паузы/воспроизведения
-        animationContainer.addEventListener('click', () => {
-            if (anim.isPaused) {
-                anim.play();
-            } else {
-                anim.pause();
-            }
-        });
+        // Экспорт функций для кнопок
+        window.loadAnimation = loadAnimation;
+        window.testDifferentFormats = testDifferentFormats;
+        window.checkFileExists = checkFileExists;
     </script>
 </body>
 </html>
