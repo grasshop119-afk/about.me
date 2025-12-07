@@ -3,36 +3,63 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Черный фон со стикером</title>
+    <title>Стикер на черном фоне</title>
+    <script src="https://unpkg.com/@lottiefiles/lottie-player@latest/dist/lottie-player.js"></script>
     <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
         body {
             background-color: #000;
             min-height: 100vh;
-            margin: 0;
             display: flex;
             justify-content: center;
             align-items: center;
+            overflow: hidden;
         }
         
-        .message {
-            color: white;
-            font-family: Arial, sans-serif;
-            text-align: center;
-            padding: 20px;
+        .sticker-container {
+            width: 300px;
+            height: 300px;
+            max-width: 90vw;
+            max-height: 90vh;
         }
         
-        .error {
-            color: #ff6b6b;
-            margin-top: 20px;
-            font-size: 14px;
+        lottie-player {
+            width: 100%;
+            height: 100%;
         }
     </style>
 </head>
 <body>
-    <div class="message">
-        <p>Для отображения .tgs стикеров нужна библиотека Lottie</p>
-        <p class="error">Файл стикера: stickers/None.tgs</p>
-        <p class="error">Используйте первый вариант скрипта с подключением библиотеки</p>
+    <div class="sticker-container">
+        <lottie-player
+            autoplay
+            loop
+            mode="normal"
+            src="stickers/None.tgs"
+            style="width: 100%; height: 100%"
+        >
+        </lottie-player>
     </div>
+
+    <script>
+        // Дополнительный код для обработки ошибок загрузки
+        document.addEventListener('DOMContentLoaded', function() {
+            const player = document.querySelector('lottie-player');
+            
+            player.addEventListener('error', function(event) {
+                console.error('Ошибка загрузки стикера:', event.detail);
+                alert('Не удалось загрузить стикер. Проверьте путь: stickers/None.tgs');
+            });
+            
+            player.addEventListener('load', function() {
+                console.log('Стикер успешно загружен!');
+            });
+        });
+    </script>
 </body>
 </html>
