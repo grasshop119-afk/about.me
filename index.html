@@ -1,38 +1,110 @@
 <!DOCTYPE html>
-<html>
+<html lang="ru">
 <head>
-    <!-- ПОДКЛЮЧЕНИЕ LOTTIE -->
-    <script src="https://unpkg.com/@lottiefiles/lottie-player@latest/dist/lottie-player.js"></script>
-    
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Lottie Animation</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bodymovin/5.12.2/lottie.min.js"></script>
     <style>
-        body {
-            background-color: #000;  /* Черный фон */
+        * {
             margin: 0;
             padding: 0;
-            height: 100vh;  /* На весь экран */
-            display: flex;
-            justify-content: center;
-            align-items: center;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
         }
         
-        /* Контейнер для стикера */
-        .sticker-container {
-            width: 300px;  /* Размер стикера */
+        body {
+            background-color: #000000;
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
+        
+        #lottie-container {
+            width: 300px;
             height: 300px;
+            max-width: 90vw;
+            max-height: 90vh;
+        }
+        
+        /* Адаптация для разных экранов */
+        @media (max-width: 768px) {
+            #lottie-container {
+                width: 250px;
+                height: 250px;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            #lottie-container {
+                width: 200px;
+                height: 200px;
+            }
         }
     </style>
 </head>
 <body>
-    <!-- СТИКЕР -->
-    <div class="sticker-container">
-        <lottie-player
-            autoplay
-            loop
-            mode="normal"
-            src="stickers/None.tgs"
-            style="width: 100%; height: 100%"
-        >
-        </lottie-player>
-    </div>
+    <div id="lottie-container"></div>
+
+    <script>
+        // Загрузка Lottie анимации
+        const animationContainer = document.getElementById('lottie-container');
+        
+        // Замените 'Animations/CTree.lottie' на путь к вашему файлу
+        const animationPath = 'Animations/CTree.lottie';
+        
+        const anim = lottie.loadAnimation({
+            container: animationContainer,
+            renderer: 'svg', // или 'canvas'
+            loop: true,
+            autoplay: true,
+            path: animationPath // путь к Lottie файлу
+        });
+        
+        // Обработка ошибок загрузки
+        anim.addEventListener('data_failed', () => {
+            console.error('Ошибка загрузки Lottie файла');
+            animationContainer.innerHTML = `
+                <div style="color: white; text-align: center; font-family: Arial, sans-serif;">
+                    <p>Ошибка загрузки анимации</p>
+                    <p>Проверьте путь к файлу: ${animationPath}</p>
+                </div>
+            `;
+        });
+        
+        // Успешная загрузка
+        anim.addEventListener('data_ready', () => {
+            console.log('Анимация загружена успешно');
+        });
+        
+        // Дополнительные опции для управления анимацией:
+        // anim.play(); // Воспроизвести
+        // anim.pause(); // Пауза
+        // anim.stop(); // Остановить
+        // anim.setSpeed(1.5); // Изменить скорость
+        // anim.goToAndStop(50, true); // Перейти к определенному кадру
+        
+        // Управление с клавиатуры (опционально)
+        document.addEventListener('keydown', (e) => {
+            if (e.code === 'Space') {
+                if (anim.isPaused) {
+                    anim.play();
+                } else {
+                    anim.pause();
+                }
+            }
+        });
+        
+        // Клик по анимации для паузы/воспроизведения
+        animationContainer.addEventListener('click', () => {
+            if (anim.isPaused) {
+                anim.play();
+            } else {
+                anim.pause();
+            }
+        });
+    </script>
 </body>
 </html>
