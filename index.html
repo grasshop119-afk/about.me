@@ -6,26 +6,23 @@
     <title>ask.me</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/bodymovin/5.12.2/lottie.min.js"></script>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-firestore-compat.js"></script>
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
+        * { margin: 0; padding: 0; user-select: none; -webkit-tap-highlight-color: transparent; box-sizing: border-box; }
         body { 
             background: #000; 
             color: #fff; 
             font-family: -apple-system, sans-serif; 
             min-height: 100vh; 
-            padding-top: 100px; /* Увеличили padding-top */
-        }
-        html, body {
-            overflow-x: hidden;
-            touch-action: pan-y;
+            padding-top: 100px;
         }
         .header { 
             position: fixed; 
-            top: 10px; /* Лого опущено на 10px */
-            left: 0;
+            top: 0; 
             width: 100%; 
             background: #000; 
-            padding: 20px 24px;
+            padding: 34px 24px 20px;
             z-index: 100; 
             display: flex;
             justify-content: center;
@@ -38,7 +35,7 @@
             color: #fff; 
         }
         .logo-dot, .logo-me, .accent-color { 
-            color: #007AFF; /* будет заменен на акцентный цвет Telegram */
+            color: #007AFF;
         }
         .profile-container { 
             padding: 0 24px; 
@@ -54,6 +51,7 @@
             align-items: center; 
             gap: 16px; 
             margin-bottom: 40px;
+            position: relative;
         }
         .avatar-frame { 
             width: 64px;
@@ -75,17 +73,10 @@
             display: flex; 
             flex-direction: column; 
             gap: 2px; 
-            flex: 1;
         }
         .user-name-container { 
             display: flex; 
             align-items: center; 
-            justify-content: space-between; /* Распределяем пространство */
-            gap: 8px;
-        }
-        .user-name-wrapper {
-            display: flex;
-            align-items: center;
             gap: 8px;
         }
         .user-name { 
@@ -96,24 +87,27 @@
             font-size: 14px; 
             color: rgba(255,255,255,0.7); 
         }
-        .icon-container {
-            display: flex;
-            align-items: center;
-            gap: 12px; /* Расстояние между иконками */
-        }
-        .verified-icon, .share-icon { 
+        .verified-icon { 
             display: flex; 
             align-items: center; 
             justify-content: center; 
-            cursor: pointer;
         }
-        .verified-icon img, .share-icon img { 
+        .verified-icon img { 
             width: 22px; 
             height: 22px; 
-            transition: transform 0.2s;
         }
-        .verified-icon img:hover, .share-icon img:hover {
-            transform: scale(1.1);
+        .copy-link-icon {
+            position: absolute;
+            right: 0;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 20px;
+            height: 20px;
+            cursor: pointer;
+            opacity: 0.7;
+        }
+        .copy-link-icon:hover {
+            opacity: 1;
         }
         .divider {
             width: 100%;
@@ -154,59 +148,29 @@
             font-size: 16px;
             text-align: center;
             min-height: 300px;
+            width: 100%;
         }
         .sticker-container {
             width: 150px;
             height: 150px;
             margin-bottom: 20px;
         }
-        /* Стили для уведомления */
-        .notification {
-            position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            background: rgba(28, 28, 30, 0.95);
-            padding: 20px 30px;
-            border-radius: 16px;
-            z-index: 1000;
-            text-align: center;
-            display: none;
-            backdrop-filter: blur(20px);
-            border: 1px solid rgba(255,255,255,0.1);
-            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
-        }
-        .notification.show {
-            display: block;
-            animation: fadeIn 0.3s ease;
-        }
-        .notification h3 {
-            margin-bottom: 15px;
-            font-size: 18px;
-        }
-        .notification .link {
-            background: rgba(255,255,255,0.1);
-            padding: 12px;
-            border-radius: 10px;
-            margin: 15px 0;
-            word-break: break-all;
-            font-family: monospace;
-            font-size: 14px;
-        }
-        .notification button {
+        .action-button {
             background: #007AFF;
             color: white;
             border: none;
-            padding: 12px 24px;
             border-radius: 10px;
+            padding: 14px 20px;
             font-size: 16px;
+            font-weight: 500;
             cursor: pointer;
-            margin-top: 10px;
+            margin-top: 20px;
             width: 100%;
+            max-width: 300px;
+            transition: opacity 0.2s;
         }
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translate(-50%, -50%) scale(0.9); }
-            to { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+        .action-button:hover {
+            opacity: 0.9;
         }
     </style>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght=700&display=swap" rel="stylesheet">
@@ -223,19 +187,15 @@
             </div>
             <div class="user-info">
                 <div class="user-name-container">
-                    <div class="user-name-wrapper">
-                        <div class="user-name" id="user-first-name">User</div>
-                        <div class="verified-icon" id="verified-icon" style="display: none;">
-                            <img src="https://img.icons8.com/?size=100&id=8jOLgduf9aBf&format=png&color=000000" alt="">
-                        </div>
-                    </div>
-                    <div class="icon-container">
-                        <div class="share-icon" id="share-icon">
-                            <img src="https://img.icons8.com/?size=100&id=AGLXTiVVflkt&format=png&color=000000" alt="Поделиться профилем">
-                        </div>
+                    <div class="user-name" id="user-first-name">User</div>
+                    <div class="verified-icon" id="verified-icon" style="display: none;">
+                        <img src="https://img.icons8.com/?size=100&id=8jOLgduf9aBf&format=png&color=000000" alt="">
                     </div>
                 </div>
                 <div class="user-username" id="user-username">@user000</div>
+            </div>
+            <div class="copy-link-icon" id="copy-link-icon" style="display: none;">
+                <img src="https://img.icons8.com/ios-filled/50/007AFF/copy.png" alt="Copy" style="width: 20px; height: 20px;">
             </div>
         </div>
 
@@ -251,10 +211,12 @@
             <div class="content" id="ideas-content">
                 <div class="sticker-container" id="sticker-ideas"></div>
                 Идей пока нет
+                <button class="action-button" id="idea-button" style="display: none;">Предложить идею</button>
             </div>
             <div class="content" id="questions-content" style="display: none;">
                 <div class="sticker-container" id="sticker-questions"></div>
                 Вопросов еще не задавали
+                <button class="action-button" id="question-button" style="display: none;">Задать вопрос</button>
             </div>
             <div class="content" id="answers-content" style="display: none;">
                 <div class="sticker-container" id="sticker-answers"></div>
@@ -263,25 +225,26 @@
         </div>
     </div>
 
-    <!-- Уведомление со ссылкой -->
-    <div class="notification" id="link-notification">
-        <h3>Ссылка на профиль</h3>
-        <div class="link" id="profile-link">Создаем ссылку...</div>
-        <button id="copy-btn">Скопировать ссылку</button>
-        <button id="close-notification" style="background: rgba(255,255,255,0.1); margin-top: 8px;">Закрыть</button>
-    </div>
-
     <script>
         // Инициализация Telegram Web App
         let tg = window.Telegram.WebApp;
         
+        // Firebase конфигурация
+        const firebaseConfig = {
+            apiKey: "AIzaSyDrvqEb5GMrWaCLSd3aHEdOQIDA321v_BA",
+            authDomain: "chibeki-ideas.firebaseapp.com",
+            projectId: "chibeki-ideas",
+            storageBucket: "chibeki-ideas.firebasestorage.app",
+            messagingSenderId: "31211023786",
+            appId: "1:31211023786:web:35343c74dbf73a50f6cfd3"
+        };
+        
+        // Инициализация Firebase
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
+        
         // Расширяем Web App на всю высоту
         tg.expand();
-        
-        // Запрещаем масштабирование
-        document.addEventListener('touchmove', function(e) {
-            if(e.scale !== 1) e.preventDefault();
-        }, { passive: false });
         
         // Получаем акцентный цвет пользователя
         let accentColor = '#007AFF';
@@ -291,6 +254,11 @@
         } else if (tg.themeParams && tg.themeParams.button_color) {
             accentColor = tg.themeParams.button_color;
         }
+        
+        // Текущий пользователь
+        let currentUser = null;
+        let profileUser = null; // Пользователь профиля
+        let isOwnProfile = false;
         
         // Функция для применения акцентного цвета
         function applyAccentColor(color) {
@@ -304,16 +272,21 @@
                 el.style.color = color;
             });
             
-            // Иконки
-            applyIconColor('.verified-icon img', color);
-            applyIconColor('.share-icon img', color);
-        }
-        
-        // Функция для применения цвета к иконкам
-        function applyIconColor(selector, color) {
-            const icon = document.querySelector(selector);
-            if (icon) {
-                icon.style.filter = 
+            // Кнопки
+            document.querySelectorAll('.action-button').forEach(el => {
+                el.style.background = color;
+            });
+            
+            // Иконка копирования
+            const copyIcon = document.getElementById('copy-link-icon');
+            if (copyIcon) {
+                copyIcon.innerHTML = `<img src="https://img.icons8.com/ios-filled/50/${color.substring(1)}/copy.png" alt="Copy" style="width: 20px; height: 20px;">`;
+            }
+            
+            // Иконка галочки
+            const verifiedIcon = document.querySelector('.verified-icon img');
+            if (verifiedIcon) {
+                verifiedIcon.style.filter = 
                     `invert(36%) sepia(90%) saturate(2476%) hue-rotate(${getHueFromHex(color)}deg) brightness(102%) contrast(101%)`;
             }
         }
@@ -346,36 +319,68 @@
             return Math.round(hue * 360);
         }
         
-        // Загружаем данные пользователя
-        const user = tg.initDataUnsafe.user;
-        let userId = null;
-        let username = null;
+        // Получаем параметры из URL (для определения чей профиль)
+        function getProfileFromUrl() {
+            const params = new URLSearchParams(window.location.search);
+            const profileId = params.get('user') || params.get('id');
+            
+            if (profileId) {
+                // Загружаем данные профиля из Firebase
+                db.collection('users').doc(profileId).get()
+                    .then(doc => {
+                        if (doc.exists) {
+                            profileUser = doc.data();
+                            profileUser.id = profileId;
+                            updateProfileUI();
+                        } else {
+                            // Если пользователь не найден, используем текущего
+                            profileUser = currentUser;
+                            isOwnProfile = true;
+                        }
+                        updateProfileUI();
+                    })
+                    .catch(error => {
+                        console.error('Error loading profile:', error);
+                        profileUser = currentUser;
+                        isOwnProfile = true;
+                        updateProfileUI();
+                    });
+            } else {
+                // Если нет параметра, показываем текущего пользователя
+                profileUser = currentUser;
+                isOwnProfile = true;
+                updateProfileUI();
+            }
+        }
         
-        if (user) {
-            userId = user.id;
+        // Обновляем UI профиля
+        function updateProfileUI() {
+            if (!profileUser) return;
             
             // Имя пользователя
-            if (user.first_name) {
-                document.getElementById('user-first-name').textContent = user.first_name;
+            if (profileUser.first_name) {
+                document.getElementById('user-first-name').textContent = profileUser.first_name;
             }
             
             // Юзернейм
-            if (user.username) {
-                username = user.username;
-                document.getElementById('user-username').textContent = '@' + username;
+            if (profileUser.username) {
+                document.getElementById('user-username').textContent = '@' + profileUser.username;
                 
                 // Галочка только для @ya_admin7
-                if (username === 'ya_admin7') {
+                if (profileUser.username === 'ya_admin7') {
                     document.getElementById('verified-icon').style.display = 'flex';
                 }
             }
             
             // Аватар
-            if (user.photo_url) {
+            const avatarContainer = document.getElementById('user-avatar');
+            avatarContainer.innerHTML = '';
+            
+            if (profileUser.photo_url) {
                 const avatarImg = document.createElement('img');
-                avatarImg.src = user.photo_url;
+                avatarImg.src = profileUser.photo_url;
                 avatarImg.alt = 'Avatar';
-                document.getElementById('user-avatar').appendChild(avatarImg);
+                avatarContainer.appendChild(avatarImg);
             } else {
                 const avatarPlaceholder = document.createElement('div');
                 avatarPlaceholder.style.width = '100%';
@@ -387,80 +392,83 @@
                 avatarPlaceholder.style.color = '#8E8E93';
                 avatarPlaceholder.style.fontSize = '24px';
                 avatarPlaceholder.innerHTML = '👤';
-                document.getElementById('user-avatar').appendChild(avatarPlaceholder);
+                avatarContainer.appendChild(avatarPlaceholder);
             }
             
-            // Обновляем текст в ответах
+            // Обновляем текст в ответах с именем пользователя
             const answersText = document.getElementById('answers-text');
-            if (answersText && user.first_name) {
-                answersText.textContent = `${user.first_name} пока не отвечал на вопросы`;
+            if (answersText && profileUser.first_name) {
+                answersText.textContent = `${profileUser.first_name} пока не отвечал на вопросы`;
             }
-        }
-        
-        // Функция для создания уникальной ссылки
-        function createProfileLink() {
-            let link = 'https://ask.me/';
             
-            if (username) {
-                link += username;
-            } else if (userId) {
-                link += 'user/' + userId;
+            // Показываем иконку копирования ссылки
+            document.getElementById('copy-link-icon').style.display = 'block';
+            
+            // Проверяем, не свой ли это профиль
+            if (currentUser && profileUser.id === currentUser.id) {
+                isOwnProfile = true;
+                // Скрываем кнопки для своего профиля
+                document.getElementById('idea-button').style.display = 'none';
+                document.getElementById('question-button').style.display = 'none';
             } else {
-                // Генерируем случайный ID если нет данных пользователя
-                const randomId = Math.random().toString(36).substring(2, 10);
-                link += 'anon/' + randomId;
+                isOwnProfile = false;
+                // Показываем кнопки для чужого профиля
+                document.getElementById('idea-button').style.display = 'block';
+                document.getElementById('question-button').style.display = 'block';
+                
+                // Обновляем текст кнопок в зависимости от вкладки
+                updateActionButtons();
             }
-            
-            // Добавляем уникальный хэш
-            const uniqueHash = Date.now().toString(36) + Math.random().toString(36).substring(2);
-            link += '?ref=' + uniqueHash.substring(0, 8);
-            
-            return link;
         }
         
-        // Обработчик для иконки "поделиться"
-        document.getElementById('share-icon').addEventListener('click', function() {
-            // Вибрация
-            if (tg.isVersionAtLeast('6.1')) {
-                tg.HapticFeedback.impactOccurred('light');
+        // Обновление кнопок действий в зависимости от вкладки
+        function updateActionButtons() {
+            if (isOwnProfile) return;
+            
+            const activeTab = document.querySelector('.tab.active').getAttribute('data-tab');
+            
+            if (activeTab === 'ideas') {
+                document.getElementById('idea-button').style.display = 'block';
+                document.getElementById('idea-button').textContent = 'Предложить идею';
+                document.getElementById('question-button').style.display = 'none';
+            } else if (activeTab === 'questions') {
+                document.getElementById('question-button').style.display = 'block';
+                document.getElementById('question-button').textContent = 'Задать вопрос';
+                document.getElementById('idea-button').style.display = 'none';
+            } else {
+                document.getElementById('idea-button').style.display = 'none';
+                document.getElementById('question-button').style.display = 'none';
             }
+        }
+        
+        // Копирование реферальной ссылки
+        function copyReferralLink() {
+            if (!profileUser) return;
             
             // Создаем ссылку
-            const link = createProfileLink();
+            const baseUrl = window.location.origin + window.location.pathname;
+            const referralUrl = `${baseUrl}?user=${profileUser.id}`;
             
-            // Показываем уведомление
-            document.getElementById('profile-link').textContent = link;
-            document.getElementById('link-notification').classList.add('show');
-        });
+            // Копируем в буфер обмена
+            navigator.clipboard.writeText(referralUrl)
+                .then(() => {
+                    tg.showAlert('Реферальная ссылка скопирована!');
+                    
+                    // Вибрация в Telegram
+                    if (tg.isVersionAtLeast('6.1')) {
+                        tg.HapticFeedback.impactOccurred('light');
+                    }
+                })
+                .catch(err => {
+                    console.error('Error copying:', err);
+                });
+        }
         
-        // Копирование ссылки в буфер обмена
-        document.getElementById('copy-btn').addEventListener('click', function() {
-            const link = document.getElementById('profile-link').textContent;
-            
-            // Используем Clipboard API
-            navigator.clipboard.writeText(link).then(() => {
-                // Вибрация при копировании
-                if (tg.isVersionAtLeast('6.1')) {
-                    tg.HapticFeedback.notificationOccurred('success');
-                }
-                
-                // Меняем текст кнопки
-                const btn = document.getElementById('copy-btn');
-                const originalText = btn.textContent;
-                btn.textContent = '✓ Скопировано!';
-                btn.style.background = '#34C759';
-                
-                setTimeout(() => {
-                    btn.textContent = originalText;
-                    btn.style.background = accentColor;
-                }, 2000);
-            });
-        });
+        // Загружаем данные текущего пользователя
+        currentUser = tg.initDataUnsafe.user;
         
-        // Закрытие уведомления
-        document.getElementById('close-notification').addEventListener('click', function() {
-            document.getElementById('link-notification').classList.remove('show');
-        });
+        // Загружаем профиль
+        getProfileFromUrl();
         
         // Загружаем стикеры
         function loadSticker(stickerId, containerId) {
@@ -511,10 +519,39 @@
                 
                 const tabId = tab.getAttribute('data-tab');
                 document.getElementById(`${tabId}-content`).style.display = 'flex';
+                
+                // Обновляем кнопки действий
+                updateActionButtons();
             });
         });
         
-        // Обновляем цвет при изменении темы
+        // Обработка кнопок действий
+        document.getElementById('idea-button').addEventListener('click', function() {
+            if (!isOwnProfile && profileUser) {
+                tg.showAlert(`Идея для ${profileUser.first_name} будет добавлена в ближайшее время!`);
+                
+                // Вибрация
+                if (tg.isVersionAtLeast('6.1')) {
+                    tg.HapticFeedback.impactOccurred('medium');
+                }
+            }
+        });
+        
+        document.getElementById('question-button').addEventListener('click', function() {
+            if (!isOwnProfile && profileUser) {
+                tg.showAlert(`Вопрос для ${profileUser.first_name} будет добавлен в ближайшее время!`);
+                
+                // Вибрация
+                if (tg.isVersionAtLeast('6.1')) {
+                    tg.HapticFeedback.impactOccurred('medium');
+                }
+            }
+        });
+        
+        // Обработка копирования ссылки
+        document.getElementById('copy-link-icon').addEventListener('click', copyReferralLink);
+        
+        // Обновляем цвет активной вкладки при изменении темы
         tg.onEvent('themeChanged', function() {
             if (tg.themeParams && tg.themeParams.accent_text_color) {
                 accentColor = tg.themeParams.accent_text_color;
