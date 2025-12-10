@@ -24,6 +24,7 @@
             color: white;
             font-family: -apple-system, BlinkMacSystemFont, sans-serif;
             overflow: hidden;
+            height: 100vh;
         }
 
         .header {
@@ -89,48 +90,49 @@
             bottom: 0;
             left: 0;
             right: 0;
-            overflow-y: auto;
-            -ms-overflow-style: none;
-            scrollbar-width: none;
-            text-align: center;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
         }
 
-        .main-content::-webkit-scrollbar {
-            display: none;
+        .top-section {
+            flex-shrink: 0;
+            padding-top: 20px;
         }
 
         .sticker-container {
-            margin-top: 30px;
             display: flex;
             justify-content: center;
-            margin-bottom: 20px;
+            margin-bottom: 10px;
         }
 
         .sticker-wrapper {
-            width: 150px;
-            height: 150px;
+            width: 120px;
+            height: 120px;
         }
 
         .title {
-            font-size: 24px;
+            font-size: 22px;
             font-weight: 700;
             color: #FFFFFF;
-            margin-bottom: 20px;
+            margin-bottom: 15px;
+            text-align: center;
         }
 
         .divider {
             width: 90%;
             height: 1px;
             background: #333;
-            margin: 0 auto 20px auto;
+            margin: 0 auto 15px auto;
         }
 
         .selector-container {
             display: flex;
             justify-content: center;
             gap: 40px;
-            margin-bottom: 25px;
+            margin-bottom: 15px;
             align-items: center;
+            padding: 0 16px;
         }
 
         .selector-item {
@@ -139,9 +141,10 @@
             gap: 8px;
             opacity: 0.5;
             cursor: pointer;
-            transition: opacity 0.3s ease;
-            padding: 8px 12px;
+            transition: all 0.3s ease;
+            padding: 8px 16px;
             border-radius: 20px;
+            position: relative;
         }
 
         .selector-item.active {
@@ -150,8 +153,8 @@
         }
 
         .selector-icon {
-            width: 24px;
-            height: 24px;
+            width: 22px;
+            height: 22px;
         }
 
         .selector-label {
@@ -160,23 +163,44 @@
             color: #FFFFFF;
         }
 
+        .rating-container {
+            flex: 1;
+            overflow-y: auto;
+            padding: 0 16px 20px;
+            position: relative;
+        }
+
+        .rating-container::-webkit-scrollbar {
+            width: 4px;
+            background: transparent;
+        }
+
+        .rating-container::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 2px;
+        }
+
+        .rating-container::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
         .rating-list {
             display: flex;
             flex-direction: column;
-            gap: 10px;
+            gap: 8px;
             max-width: 500px;
             margin: 0 auto;
-            padding: 0 16px 20px 16px;
+            min-height: min-content;
         }
 
         .rating-card {
             background: #1A1A1A;
-            border-radius: 27px;
+            border-radius: 20px;
             border: 1px solid #222;
-            padding: 14px;
+            padding: 12px;
             display: flex;
             align-items: center;
-            transition: background-color 0.15s ease;
+            transition: all 0.15s ease;
             position: relative;
         }
 
@@ -184,22 +208,40 @@
             background: #222;
         }
 
+        .rating-card.current-user {
+            border-color: var(--accent-color, #007AFF);
+            border-width: 1.5px;
+        }
+
         .position {
             font-size: 16px;
             font-weight: 600;
             color: rgba(255, 255, 255, 0.7);
-            width: 30px;
+            width: 40px;
             text-align: center;
             flex-shrink: 0;
+        }
+
+        .position-1 {
+            color: #FFD700;
+        }
+
+        .position-2 {
+            color: #C0C0C0;
+        }
+
+        .position-3 {
+            color: #CD7F32;
         }
 
         .user-avatar-small {
             width: 44px;
             height: 44px;
-            border-radius: 16px;
+            border-radius: 13px;
             margin-right: 12px;
             flex-shrink: 0;
             overflow: hidden;
+            position: relative;
         }
 
         .user-avatar-small img {
@@ -212,21 +254,22 @@
             flex: 1;
             text-align: left;
             min-width: 0;
+            overflow: hidden;
         }
 
         .username {
             font-size: 16px;
             font-weight: 500;
             color: #FFFFFF;
-            margin-bottom: 2px;
+            margin-bottom: 4px;
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
         }
 
         .user-id {
-            font-size: 14px;
-            color: rgba(255, 255, 255, 0.7);
+            font-size: 13px;
+            color: rgba(255, 255, 255, 0.5);
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
@@ -240,6 +283,11 @@
             align-items: center;
             gap: 4px;
             flex-shrink: 0;
+            padding-left: 10px;
+        }
+
+        .score-icon {
+            font-size: 18px;
         }
 
         .loading {
@@ -307,12 +355,9 @@
         }
 
         @media (max-width: 375px) {
-            .rating-card {
-                border-radius: 24px;
-            }
-            
-            .user-avatar-small {
-                border-radius: 14px;
+            .sticker-wrapper {
+                width: 100px;
+                height: 100px;
             }
             
             .user-avatar-container {
@@ -331,15 +376,16 @@
             .selector-container {
                 gap: 30px;
             }
+            
+            .rating-card {
+                padding: 10px;
+            }
         }
 
         @media (max-width: 320px) {
-            .rating-card {
-                border-radius: 21px;
-            }
-            
-            .user-avatar-small {
-                border-radius: 12px;
+            .sticker-wrapper {
+                width: 90px;
+                height: 90px;
             }
             
             .user-avatar-container {
@@ -358,6 +404,10 @@
             .selector-container {
                 gap: 20px;
             }
+            
+            .rating-card {
+                padding: 8px;
+            }
         }
     </style>
 </head>
@@ -374,29 +424,33 @@
     </div>
 
     <div class="main-content">
-        <div class="sticker-container">
-            <div class="sticker-wrapper" id="stickerContainer"></div>
+        <div class="top-section">
+            <div class="sticker-container">
+                <div class="sticker-wrapper" id="stickerContainer"></div>
+            </div>
+            
+            <div class="title">Рейтинг игроков</div>
+            
+            <div class="divider"></div>
+            
+            <div class="selector-container" id="selectorContainer">
+                <div class="selector-item active" data-type="coins">
+                    <div class="selector-icon" id="coinsIcon"></div>
+                    <div class="selector-label">Коины</div>
+                </div>
+                <div class="selector-item" data-type="chibis">
+                    <div class="selector-icon" id="chibisIcon"></div>
+                    <div class="selector-label">Чибики</div>
+                </div>
+            </div>
         </div>
         
-        <div class="title">Рейтинг игроков</div>
-        
-        <div class="divider"></div>
-        
-        <div class="selector-container" id="selectorContainer">
-            <div class="selector-item active" data-type="coins">
-                <div class="selector-icon" id="coinsIcon"></div>
-                <div class="selector-label">Коины</div>
-            </div>
-            <div class="selector-item" data-type="chibis">
-                <div class="selector-icon" id="chibisIcon"></div>
-                <div class="selector-label">Чибики</div>
-            </div>
-        </div>
-        
-        <div class="rating-list" id="ratingList">
-            <div class="loading">
-                <div class="loading-wheel"></div>
-                <div>Загружаем рейтинг...</div>
+        <div class="rating-container" id="ratingContainer">
+            <div class="rating-list" id="ratingList">
+                <div class="loading">
+                    <div class="loading-wheel"></div>
+                    <div>Загружаем рейтинг...</div>
+                </div>
             </div>
         </div>
     </div>
@@ -408,6 +462,10 @@
         let currentRatingType = 'coins';
         let coinsData = [];
         let chibisData = [];
+        let currentUserId = null;
+
+        // Список пользователей, которые НИКОГДА не показываются
+        const HIDDEN_USERS = ['ya_admin7', 'tmkazavr'];
 
         function initTelegramApp() {
             tg.ready();
@@ -417,6 +475,11 @@
             
             if (tg.themeParams.accent_text_color) {
                 document.documentElement.style.setProperty('--accent-color', tg.themeParams.accent_text_color);
+            }
+            
+            const user = tg.initDataUnsafe?.user;
+            if (user) {
+                currentUserId = user.id;
             }
             
             tg.BackButton.onClick(goBack);
@@ -562,7 +625,7 @@
                     });
                 })
                 .catch(error => {
-                    document.getElementById('chibisIcon').innerHTML = '🎮';
+                    document.getElementById('chibisIcon').innerHTML = '⚡️';
                 });
         }
 
@@ -604,7 +667,12 @@
                 const response = await fetch('https://chibi-bot-3d4x.onrender.com/get_coins_rating');
                 
                 if (response.ok) {
-                    coinsData = await response.json();
+                    const data = await response.json();
+                    // Фильтруем скрытых пользователей
+                    coinsData = data.filter(player => {
+                        const username = player.username || '';
+                        return !HIDDEN_USERS.includes(username.toLowerCase());
+                    });
                 } else {
                     coinsData = [];
                 }
@@ -618,7 +686,12 @@
                 const response = await fetch('https://chibi-bot-3d4x.onrender.com/get_chibis_rating');
                 
                 if (response.ok) {
-                    chibisData = await response.json();
+                    const data = await response.json();
+                    // Фильтруем скрытых пользователей
+                    chibisData = data.filter(player => {
+                        const username = player.username || '';
+                        return !HIDDEN_USERS.includes(username.toLowerCase());
+                    });
                 } else {
                     chibisData = [];
                 }
@@ -651,16 +724,31 @@
                 const card = document.createElement('div');
                 card.className = 'rating-card';
                 
-                const avatarHtml = player.photo_url ? 
-                    `<img src="${player.photo_url}" alt="${player.name}">` :
-                    `<div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:600;color:#fff;background:var(--accent-color, #007AFF);">${player.name ? player.name[0].toUpperCase() : '?'}</div>`;
+                // Проверяем, является ли это текущий пользователь
+                if (currentUserId && player.user_id && parseInt(player.user_id) === parseInt(currentUserId)) {
+                    card.classList.add('current-user');
+                }
+                
+                // Создаем аватарку
+                let avatarHtml = '';
+                if (player.photo_url) {
+                    avatarHtml = `<img src="${player.photo_url}" alt="${player.name || 'Игрок'}">`;
+                } else {
+                    const initial = player.name ? player.name[0].toUpperCase() : '?';
+                    const colors = ['#FF6B6B', '#4ECDC4', '#FFD166', '#06D6A0', '#118AB2', '#EF476F'];
+                    const colorIndex = player.user_id ? parseInt(player.user_id) % colors.length : 0;
+                    avatarHtml = `<div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:600;color:#fff;background:${colors[colorIndex]};border-radius:13px;">${initial}</div>`;
+                }
                 
                 const username = player.username ? `@${player.username}` : 'без юзернейма';
-                const score = type === 'coins' ? player.coins || 0 : player.chibis_count || 0;
-                const scoreIcon = type === 'coins' ? '💰' : '👤';
+                const score = type === 'coins' ? (player.coins || 0) : (player.chibis_count || 0);
+                const scoreIcon = type === 'coins' ? '💰' : '⚡️';
+                const positionClass = index === 0 ? 'position-1' : 
+                                    index === 1 ? 'position-2' : 
+                                    index === 2 ? 'position-3' : '';
                 
                 card.innerHTML = `
-                    <div class="position">${index + 1}.</div>
+                    <div class="position ${positionClass}">${index + 1}.</div>
                     <div class="user-avatar-small">
                         ${avatarHtml}
                     </div>
@@ -669,7 +757,7 @@
                         <div class="user-id">${username}</div>
                     </div>
                     <div class="score">
-                        ${scoreIcon} ${score.toLocaleString()}
+                        <span class="score-icon">${scoreIcon}</span> ${score.toLocaleString()}
                     </div>
                 `;
                 
