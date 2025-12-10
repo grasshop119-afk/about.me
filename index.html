@@ -6,8 +6,6 @@
     <title>Рейтинг — Чибики</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/bodymovin/5.12.2/lottie.min.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-firestore-compat.js"></script>
     <style>
         * {
             -webkit-touch-callout: none;
@@ -24,7 +22,7 @@
             padding: 0;
             background: #000;
             color: white;
-            font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, sans-serif;
             overflow: hidden;
         }
 
@@ -206,6 +204,7 @@
             align-items: center;
             transition: background-color 0.15s ease;
             position: relative;
+            cursor: pointer;
         }
 
         .rating-card:active {
@@ -230,25 +229,19 @@
             overflow: hidden;
             position: relative;
             background: var(--accent-color, #007AFF);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 20px;
+            color: #fff;
+            font-family: Arial, sans-serif;
         }
 
         .user-avatar-small img {
             width: 100%;
             height: 100%;
             object-fit: cover;
-        }
-
-        .avatar-initial {
-            width: 100%;
-            height: 100%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 20px;
-            font-weight: 700;
-            color: #fff;
-            font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', sans-serif;
-            text-transform: uppercase;
         }
 
         .user-info {
@@ -356,6 +349,7 @@
             
             .user-avatar-small {
                 border-radius: 14px;
+                font-size: 18px;
             }
             
             .user-avatar-container {
@@ -383,6 +377,7 @@
             
             .user-avatar-small {
                 border-radius: 12px;
+                font-size: 16px;
             }
             
             .user-avatar-container {
@@ -457,21 +452,8 @@
         let currentRatingType = 'coins';
         let coinsData = [];
         let chibisData = [];
-        let userDataMap = new Map(); // Для хранения данных пользователей из Firebase
-        let firestoreInitialized = false;
         
-        // Список исключенных пользователей (в нижнем регистре)
         const EXCLUDED_USERS = ['ya_admin7', 'tmkazavr'];
-        
-        // Конфигурация Firebase
-        const firebaseConfig = {
-            apiKey: "AIzaSyDrvqEb5GMrWaCLSd3aHEdOQIDA321v_BA",
-            authDomain: "chibeki-ideas.firebaseapp.com",
-            projectId: "chibeki-ideas",
-            storageBucket: "chibeki-ideas.firebasestorage.app",
-            messagingSenderId: "31211023786",
-            appId: "1:31211023786:web:35343c74dbf73a50f6cfd3"
-        };
 
         function initTelegramApp() {
             tg.ready();
@@ -494,66 +476,10 @@
                 }
             });
             
-            initializeFirebase();
             setupUserAvatar();
             loadStickers();
             setupSelector();
-        }
-
-        function initializeFirebase() {
-            try {
-                firebase.initializeApp(firebaseConfig);
-                firestoreInitialized = true;
-                console.log('Firebase инициализирован');
-                loadAllRatingData();
-            } catch (error) {
-                console.error('Ошибка инициализации Firebase:', error);
-                // Если Firebase не инициализирован, все равно загружаем рейтинг
-                loadAllRatingData();
-            }
-        }
-
-        async function loadUserDataFromFirestore(userId) {
-            if (!firestoreInitialized) return null;
-            
-            try {
-                const db = firebase.firestore();
-                const userDoc = await db.collection('users').doc(userId.toString()).get();
-                
-                if (userDoc.exists) {
-                    const userData = userDoc.data();
-                    userDataMap.set(userId, userData);
-                    return userData;
-                }
-            } catch (error) {
-                console.error('Ошибка загрузки данных пользователя из Firestore:', error);
-            }
-            return null;
-        }
-
-        async function loadAllUserDataFromFirestore(userIds) {
-            if (!firestoreInitialized) return;
-            
-            try {
-                const db = firebase.firestore();
-                // Загружаем данные для всех пользователей сразу
-                const usersRef = db.collection('users');
-                
-                // Получаем данные для всех userIds
-                const promises = userIds.map(userId => 
-                    usersRef.doc(userId.toString()).get()
-                );
-                
-                const snapshots = await Promise.all(promises);
-                
-                snapshots.forEach((snapshot, index) => {
-                    if (snapshot.exists) {
-                        userDataMap.set(userIds[index], snapshot.data());
-                    }
-                });
-            } catch (error) {
-                console.error('Ошибка загрузки данных пользователей из Firestore:', error);
-            }
+            loadAllRatingData();
         }
 
         function setupUserAvatar() {
@@ -563,36 +489,24 @@
             const avatarContainer = document.getElementById('userAvatarContainer');
             
             if (user) {
-                // Сначала устанавливаем аватар из Telegram
                 if (user.photo_url) {
                     avatarElement.innerHTML = `<img src="${user.photo_url}" alt="Avatar" style="width:100%;height:100%;object-fit:cover;border-radius:12px;">`;
                 } else {
-                    const initial = user.username ? user.username[0].toUpperCase() : 'U';
-                    avatarElement.innerHTML = `<div class="avatar-initial" style="font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', sans-serif; font-weight: 700;">${initial}</div>`;
+                    const initial = getFirstValidChar(user.username || user.first_name || 'U');
+                    avatarElement.innerHTML = `<div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:600;color:#fff;border-radius:12px;background:var(--accent-color, #007AFF);font-family:Arial, sans-serif;">${initial}</div>`;
                 }
                 
                 const username = user.username || '';
                 
-                // Загружаем данные пользователя из Firestore
-                if (firestoreInitialized && user.id) {
-                    loadUserDataFromFirestore(user.id).then(userData => {
-                        if (userData) {
-                            // Обновляем аватар из Firestore, если есть
-                            if (userData.photo_url) {
-                                avatarElement.innerHTML = `<img src="${userData.photo_url}" alt="Avatar" style="width:100%;height:100%;object-fit:cover;border-radius:12px;">`;
-                            }
-                            
-                            // Обновляем гифку из Firestore, если есть
-                            if (userData.reward_gif) {
-                                currentUserGif = userData.reward_gif;
-                                gifElement.src = currentUserGif;
-                            }
-                        }
-                    });
+                if (username.toLowerCase() === 'temkazavr') {
+                    currentUserGif = 'https://stickers.fullyst.com/e7e72911-670d-5946-93e4-3a32dfc3bdbd/full/AgADpWUAAhchkEo.webp';
+                } else if (username.toLowerCase() === 'ribapibaa') {
+                    currentUserGif = 'https://telepot.ru/images/stickers_img/652a5ce136.gif';
+                } else {
+                    currentUserGif = 'https://stickers.fullyst.com/0f72a8b7-c353-5e21-9e25-cbaa1f8b8a68/full/AgAD4SIAAm86EEk.webp';
                 }
                 
-                // Устанавливаем дефолтную гифку
-                gifElement.src = currentUserGif || 'https://stickers.fullyst.com/0f72a8b7-c353-5e21-9e25-cbaa1f8b8a68/full/AgAD4SIAAm86EEk.webp';
+                gifElement.src = currentUserGif;
                 
                 avatarContainer.addEventListener('click', function(e) {
                     e.stopPropagation();
@@ -604,7 +518,7 @@
                     toggleEventTooltip();
                 });
             } else {
-                avatarElement.innerHTML = `<img src="https://img.icons8.com/?size=100&id=83180&format=png&color=000000" alt="User" style="filter: invert(1) opacity(0.7); width:20px;height:20px;">`;
+                avatarElement.innerHTML = `<div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:600;color:#fff;border-radius:12px;background:var(--accent-color, #007AFF);font-family:Arial, sans-serif;">U</div>`;
                 currentUserGif = 'https://stickers.fullyst.com/0f72a8b7-c353-5e21-9e25-cbaa1f8b8a68/full/AgAD4SIAAm86EEk.webp';
                 gifElement.src = currentUserGif;
                 
@@ -618,6 +532,30 @@
                     toggleEventTooltip();
                 });
             }
+        }
+
+        function getFirstValidChar(str) {
+            if (!str || str.trim() === '') return 'Н';
+            
+            const cleanStr = str.trim();
+            const firstChar = cleanStr[0];
+            
+            const validCharsRegex = /[a-zA-Zа-яА-ЯёЁ0-9]/;
+            const emojiRegex = /[\uD800-\uDBFF][\uDC00-\uDFFF]|[\u2600-\u27BF]|[\uD83C][\uDF00-\uDFFF]|[\uD83D][\uDC00-\uDE4F]/;
+            
+            if (emojiRegex.test(firstChar) || firstChar === '@') {
+                if (cleanStr.length > 1) {
+                    for (let i = 1; i < cleanStr.length; i++) {
+                        const char = cleanStr[i];
+                        if (char !== '@' && char !== ' ') {
+                            return char.toUpperCase();
+                        }
+                    }
+                }
+                return 'Н';
+            }
+            
+            return firstChar.toUpperCase();
         }
 
         function toggleEventTooltip() {
@@ -717,7 +655,6 @@
             });
         }
 
-        // Функция для фильтрации исключенных пользователей
         function filterExcludedUsers(users) {
             return users.filter(user => {
                 const username = user.username ? user.username.toLowerCase() : '';
@@ -732,17 +669,6 @@
                     loadChibisRating()
                 ]);
                 
-                // Собираем все userIds из обоих рейтингов
-                const allUserIds = new Set();
-                [...coinsData, ...chibisData].forEach(user => {
-                    if (user.id) allUserIds.add(user.id);
-                });
-                
-                // Загружаем данные всех пользователей из Firestore
-                if (firestoreInitialized && allUserIds.size > 0) {
-                    await loadAllUserDataFromFirestore(Array.from(allUserIds));
-                }
-                
                 renderCurrentRating();
             } catch (error) {
                 document.getElementById('ratingList').innerHTML = 
@@ -756,7 +682,6 @@
                 
                 if (response.ok) {
                     let data = await response.json();
-                    // Фильтруем исключенных пользователей
                     coinsData = filterExcludedUsers(data);
                 } else {
                     coinsData = [];
@@ -772,7 +697,6 @@
                 
                 if (response.ok) {
                     let data = await response.json();
-                    // Фильтруем исключенных пользователей
                     chibisData = filterExcludedUsers(data);
                 } else {
                     chibisData = [];
@@ -783,13 +707,21 @@
         }
 
         function renderCurrentRating() {
-            const ratingList = document.getElementById('ratingList');
-            
             if (currentRatingType === 'coins') {
                 renderRating(coinsData, currentRatingType);
             } else {
                 renderRating(chibisData, currentRatingType);
             }
+        }
+
+        function getDisplayName(player) {
+            if (player.name && player.name.trim() !== '') {
+                return player.name.trim();
+            }
+            if (player.username && player.username.trim() !== '') {
+                return player.username.trim();
+            }
+            return 'Ноунейм';
         }
 
         function renderRating(players, type) {
@@ -806,33 +738,17 @@
                 const card = document.createElement('div');
                 card.className = 'rating-card';
                 
-                const username = player.username ? `@${player.username}` : 'без юзернейма';
+                const username = player.username ? `@${player.username.trim()}` : 'Без юза';
                 const score = type === 'coins' ? player.coins || 0 : player.chibis_count || 0;
                 const scoreIcon = type === 'coins' ? '💰' : '⚡️';
+                const displayName = getDisplayName(player);
+                const avatarInitial = getFirstValidChar(displayName);
                 
-                // Получаем данные пользователя из Firestore
-                const userFirestoreData = player.id ? userDataMap.get(player.id) : null;
-                
-                // Определяем, что показывать в аватаре
                 let avatarContent = '';
-                let avatarUrl = null;
-                
-                // Проверяем приоритеты для аватара:
-                // 1. Аватар из Firestore
-                // 2. Аватар из данных рейтинга
-                // 3. Инициалы
-                if (userFirestoreData && userFirestoreData.photo_url) {
-                    avatarUrl = userFirestoreData.photo_url;
-                } else if (player.photo_url) {
-                    avatarUrl = player.photo_url;
-                }
-                
-                if (avatarUrl) {
-                    avatarContent = `<img src="${avatarUrl}" alt="${player.name}" onerror="this.parentElement.innerHTML='<div class=\\'avatar-initial\\'>${player.name ? player.name[0].toUpperCase() : '?'}</div>'">`;
+                if (player.photo_url) {
+                    avatarContent = `<img src="${player.photo_url}" alt="${displayName}" onerror="this.parentElement.innerHTML='<div style=\\'width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-family:Arial, sans-serif;font-weight:bold;font-size:20px;color:#fff;background:var(--accent-color, #007AFF);\\'>${avatarInitial}</div>'">`;
                 } else {
-                    const initial = player.name ? player.name[0].toUpperCase() : 
-                                   player.username ? player.username[0].toUpperCase() : '?';
-                    avatarContent = `<div class="avatar-initial">${initial}</div>`;
+                    avatarContent = `<div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-family:Arial, sans-serif;font-weight:bold;font-size:20px;color:#fff;background:var(--accent-color, #007AFF);">${avatarInitial}</div>`;
                 }
                 
                 card.innerHTML = `
@@ -841,13 +757,22 @@
                         ${avatarContent}
                     </div>
                     <div class="user-info">
-                        <div class="username">${player.name || 'Игрок'}</div>
+                        <div class="username">${displayName}</div>
                         <div class="user-id">${username}</div>
                     </div>
                     <div class="score">
                         ${scoreIcon} ${score.toLocaleString()}
                     </div>
                 `;
+                
+                if (player.username && player.username.trim() !== '') {
+                    card.addEventListener('click', function() {
+                        tg.HapticFeedback.impactOccurred('light');
+                        tg.openTelegramLink(`https://t.me/${player.username}`);
+                    });
+                } else {
+                    card.style.cursor = 'default';
+                }
                 
                 ratingList.appendChild(card);
             });
