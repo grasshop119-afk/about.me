@@ -26,69 +26,92 @@
         .container {
             max-width: 1200px;
             margin: 0 auto;
-            padding: 32px 24px;
+            padding: 0 24px;
         }
 
         .header {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 32px 0 16px 0;
-            /* Убрана граница */
-            margin-bottom: 20px;
-            /* Прозрачный фон */
-            background: transparent;
+            padding: 85px 0 0 0;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            background-color: transparent;
+            z-index: 100;
+        }
+
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            width: 100%;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 24px;
         }
 
         .title {
             font-size: 32px;
-            font-weight: 400; /* Не жирный */
+            font-weight: 400;
             letter-spacing: -0.015em;
-            color: #f5f5f7; /* Простой белый вместо градиента */
+            color: #f5f5f7;
         }
 
         .create-button {
             background-color: #007AFF;
             color: #ffffff;
-            font-size: 15px; /* Чуть мельче */
-            font-weight: 500; /* Не жирный */
+            font-size: 15px;
+            font-weight: 500;
             padding: 10px 22px;
             border: none;
             border-radius: 980px;
             cursor: pointer;
-            /* Убраны все transition и hover эффекты */
             min-width: 90px;
             text-align: center;
             display: inline-flex;
             align-items: center;
             justify-content: center;
-            /* Убраны все псевдоэлементы для hover эффектов */
-        }
-
-        /* Убраны все hover, active, focus эффекты */
-        .create-button:hover,
-        .create-button:active,
-        .create-button:focus {
-            background-color: #007AFF; /* Всегда один цвет */
-            transform: none; /* Без изменений размера */
-            outline: none; /* Без outline при фокусе */
         }
 
         .content {
-            padding: 20px 0;
+            padding: 120px 0 40px 0;
             color: #86868b;
-            font-size: 17px; /* Чуть мельче */
+            font-size: 21px;
             line-height: 1.381;
             font-weight: 400;
             letter-spacing: 0.011em;
         }
 
-        /* Убраны дополнительные стили для текста с градиентом */
+        /* Убираем все hover эффекты */
+        .create-button:hover,
+        .create-button:active,
+        .create-button:focus {
+            background-color: #007AFF;
+            transform: none;
+            opacity: 1;
+        }
+
+        .create-button:hover::after,
+        .create-button:active::after,
+        .create-button:focus::after {
+            background: none;
+        }
+
+        /* Убираем outline при фокусе */
+        .create-button:focus {
+            outline: none;
+        }
 
         /* Адаптивность */
         @media (max-width: 768px) {
             .container {
-                padding: 20px 16px;
+                padding: 0 16px;
+            }
+            
+            .header-content {
+                padding: 0 16px;
             }
             
             .title {
@@ -96,12 +119,8 @@
             }
             
             .create-button {
-                padding: 8px 18px;
+                padding: 9px 18px;
                 font-size: 14px;
-            }
-            
-            .header {
-                padding: 24px 0 12px 0;
             }
         }
 
@@ -111,13 +130,9 @@
             }
             
             .create-button {
-                padding: 7px 16px;
+                padding: 8px 16px;
                 font-size: 13px;
                 min-width: 80px;
-            }
-            
-            .header {
-                padding: 20px 0 10px 0;
             }
         }
     </style>
@@ -125,8 +140,10 @@
 <body>
     <div class="container">
         <header class="header">
-            <h1 class="title">Вишлист</h1>
-            <button class="create-button" id="createButton">Создать</button>
+            <div class="header-content">
+                <h1 class="title">Вишлист</h1>
+                <button class="create-button" id="createButton">Создать</button>
+            </div>
         </header>
         
         <main class="content">
@@ -144,19 +161,24 @@
                 console.log('Кнопка "Создать" нажата, но ничего не происходит');
             });
             
-            // Убираем все дополнительные стили и анимации
+            // Добавляем стили для точного соответствия требованиям
             const style = document.createElement('style');
             style.textContent = `
-                /* Минимальные стили без эффектов */
+                /* Дополнительные стили */
                 body {
                     -webkit-font-smoothing: antialiased;
                     -moz-osx-font-smoothing: grayscale;
                     text-rendering: optimizeLegibility;
                 }
                 
-                /* Отключаем все переходы и трансформации */
-                * {
-                    transition: none !important;
+                /* Фиксируем расстояние от верха до контента - 85px */
+                .content {
+                    margin-top: 85px;
+                }
+                
+                /* Гарантируем, что кнопка не будет реагировать на наведение */
+                .create-button {
+                    pointer-events: none;
                 }
             `;
             document.head.appendChild(style);
