@@ -5,394 +5,143 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Вишлист</title>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
         body {
-            background-color: #000000;
-            color: #f5f5f7;
-            font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'SF Pro Display', 'Helvetica Neue', Arial, sans-serif;
-            font-weight: 400;
-            line-height: 1.47059;
-            letter-spacing: -0.022em;
+            background: #000; color: #f5f5f7;
+            font-family: -apple-system, BlinkMacSystemFont, sans-serif;
             min-height: 100vh;
-            padding: 0;
-            margin: 0;
         }
 
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 0 24px;
-        }
-
-        /* Шапка */
         .header {
-            position: fixed;
-            top: 5px;
-            left: 0;
-            right: 0;
-            background-color: transparent;
-            z-index: 100;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding-top: 5px;
-        }
-
-        .header-content {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            position: relative;
+            position: fixed; top: 45px; left: 0; right: 0;
+            background: transparent; z-index: 100;
+            display: flex; align-items: center; justify-content: center;
         }
 
         .title {
-            font-size: 24px;
-            font-weight: 400;
-            letter-spacing: -0.015em;
-            color: #f5f5f7;
-            margin-right: 8px;
+            font-size: 24px; font-weight: 400;
+            color: #f5f5f7; letter-spacing: -0.015em;
         }
 
         .add-button {
-            background-color: #2a2a2c;
-            width: 26px;
-            height: 26px;
-            border-radius: 50%;
-            border: none;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
+            background: #2a2a2c; width: 26px; height: 26px;
+            border-radius: 50%; border: none; cursor: pointer;
+            display: flex; align-items: center; justify-content: center;
+            margin-left: 8px;
         }
 
         .add-button img {
-            width: 12px;
-            height: 12px;
-            filter: invert(0.9);
+            width: 12px; height: 12px; filter: invert(0.9);
         }
 
-        /* Подсказка */
         .tooltip {
-            position: absolute;
-            top: calc(100% + 8px);
-            left: 50%;
-            transform: translateX(-50%) rotateX(20deg);
-            background-color: rgba(28, 28, 30, 0.85);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
-            border-radius: 14px;
-            padding: 16px;
-            width: 280px;
-            opacity: 0;
-            visibility: hidden;
-            transition: all 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
-            z-index: 1000;
+            position: absolute; top: calc(100% + 8px); left: 50%;
+            transform: translateX(-50%) scale(0.9);
+            background: rgba(28, 28, 30, 0.85); backdrop-filter: blur(20px);
+            border-radius: 14px; padding: 16px; width: 280px;
+            opacity: 0; visibility: hidden; z-index: 1000;
+            transition: all 0.3s cubic-bezier(0.5, 2, 0.5, 1);
             box-shadow: 0 12px 32px rgba(0, 0, 0, 0.4);
-            transform-style: preserve-3d;
-            perspective: 1000px;
         }
 
         .tooltip::before {
-            content: '';
-            position: absolute;
-            top: -8px;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 16px;
-            height: 8px;
-            background-color: rgba(28, 28, 30, 0.85);
-            clip-path: polygon(50% 0%, 0% 100%, 100% 100%);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
+            content: ''; position: absolute; top: -8px; left: 50%;
+            transform: translateX(-50%); width: 16px; height: 8px;
+            background: rgba(28, 28, 30, 0.85); clip-path: polygon(50% 0%, 0% 100%, 100% 100%);
+            backdrop-filter: blur(20px); opacity: 0;
+            transition: opacity 0.2s ease 0.1s;
         }
 
-        .tooltip.show {
-            opacity: 1;
-            visibility: visible;
-            transform: translateX(-50%) rotateX(0deg) scale(1);
-        }
+        .tooltip.show { opacity: 1; visibility: visible; transform: translateX(-50%) scale(1); }
+        .tooltip.show::before { opacity: 1; }
 
-        .tooltip-title {
-            font-size: 17px;
-            font-weight: 600;
-            color: #f5f5f7;
-            margin-bottom: 6px;
-        }
+        .tooltip-title { font-size: 17px; font-weight: 600; color: #f5f5f7; margin-bottom: 6px; }
+        .tooltip-desc { font-size: 13px; color: rgba(245, 245, 247, 0.7); margin-bottom: 16px; }
 
-        .tooltip-description {
-            font-size: 13px;
-            color: rgba(245, 245, 247, 0.7);
-            font-weight: 400;
-            line-height: 1.4;
-            margin-bottom: 16px;
-        }
-
-        .options {
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-        }
-
+        .options { display: flex; flex-direction: column; gap: 10px; }
+        
         .option {
-            background-color: rgba(44, 44, 46, 0.8);
-            border: none;
-            border-radius: 10px;
-            padding: 14px;
-            text-align: left;
-            font-size: 15px;
-            color: #f5f5f7;
-            font-weight: 400;
-            cursor: pointer;
-            transition: all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
-            backdrop-filter: blur(10px);
+            background: rgba(44, 44, 46, 0.8); border: none; border-radius: 10px;
+            padding: 14px; text-align: left; font-size: 15px; color: #f5f5f7;
+            cursor: pointer; backdrop-filter: blur(10px);
         }
 
-        .option:hover {
-            background-color: rgba(58, 58, 60, 0.9);
-            transform: translateY(-1px);
-        }
-
-        /* Основной контент */
         .content {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            min-height: 100vh;
-            text-align: center;
+            display: flex; flex-direction: column; align-items: center;
+            justify-content: center; min-height: 100vh; text-align: center;
+            padding-top: 100px;
         }
 
-        .empty-image {
-            width: 200px;
-            height: 200px;
-            margin-bottom: 30px;
+        .empty-image { width: 200px; height: 200px; margin-bottom: 30px; }
+        .empty-title { font-size: 28px; font-weight: 500; color: #f5f5f7; margin-bottom: 12px; }
+        .empty-desc { font-size: 17px; color: rgba(245, 245, 247, 0.7); max-width: 300px; }
+
+        .badge {
+            position: fixed; top: 3px; left: 50%; transform: translateX(-50%);
+            background: #007AFF; color: #fff; font-size: 13px; font-weight: 500;
+            padding: 4px 12px; border-radius: 980px; z-index: 101;
         }
 
-        .empty-title {
-            font-size: 28px;
-            font-weight: 500;
-            color: #f5f5f7;
-            margin-bottom: 12px;
-            letter-spacing: -0.015em;
-        }
-
-        .empty-description {
-            font-size: 17px;
-            color: rgba(245, 245, 247, 0.7);
-            font-weight: 400;
-            line-height: 1.47059;
-            letter-spacing: -0.022em;
-            max-width: 300px;
-        }
-
-        /* Адаптивность */
         @media (max-width: 768px) {
-            .container {
-                padding: 0 16px;
-            }
-            
-            .title {
-                font-size: 22px;
-            }
-            
-            .tooltip {
-                width: 260px;
-            }
-            
-            .empty-image {
-                width: 180px;
-                height: 180px;
-            }
-            
-            .empty-title {
-                font-size: 24px;
-            }
-            
-            .empty-description {
-                font-size: 16px;
-                max-width: 280px;
-            }
-        }
-
-        @media (max-width: 480px) {
-            .title {
-                font-size: 20px;
-            }
-            
-            .add-button {
-                width: 24px;
-                height: 24px;
-            }
-            
-            .add-button img {
-                width: 11px;
-                height: 11px;
-            }
-            
-            .tooltip {
-                width: 240px;
-                left: 50%;
-                transform-origin: top center;
-            }
-            
-            .empty-image {
-                width: 160px;
-                height: 160px;
-            }
-            
-            .empty-title {
-                font-size: 22px;
-            }
-            
-            .empty-description {
-                font-size: 15px;
-                max-width: 260px;
-            }
+            .tooltip { width: 260px; }
+            .empty-image { width: 180px; height: 180px; }
+            .empty-title { font-size: 24px; }
+            .empty-desc { font-size: 16px; max-width: 280px; }
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <header class="header">
-            <div class="header-content">
-                <h1 class="title">Вишлист</h1>
-                <button class="add-button" id="addButton">
-                    <img src="https://img.icons8.com/?size=100&id=3220&format=png&color=000000" alt="Добавить">
-                </button>
-                <div class="tooltip" id="tooltip">
-                    <div class="tooltip-title">Создать что?</div>
-                    <div class="tooltip-description">Выбери тип листа, который будет удобнее тебе</div>
-                    <div class="options">
-                        <button class="option" data-type="classic">Классический</button>
-                        <button class="option" data-type="target">Целевой</button>
-                    </div>
-                </div>
+    <div class="badge">Вишлист</div>
+    
+    <header class="header">
+        <h1 class="title">Вишлист</h1>
+        <button class="add-button" id="addButton">
+            <img src="https://img.icons8.com/?size=100&id=3220&format=png&color=000000" alt="+">
+        </button>
+        <div class="tooltip" id="tooltip">
+            <div class="tooltip-title">Создать что?</div>
+            <div class="tooltip-desc">Выбери тип листа, который будет удобнее тебе</div>
+            <div class="options">
+                <button class="option" data-type="classic">Классический</button>
+                <button class="option" data-type="target">Целевой</button>
             </div>
-        </header>
-        
-        <main class="content">
-            <img src="https://i.ibb.co/gMyP6HYn/IMG-4097.png" alt="Пусто" class="empty-image">
-            <h2 class="empty-title">Пустовато тут…</h2>
-            <p class="empty-description">Думаю, самое время это исправить!</p>
-        </main>
-    </div>
+        </div>
+    </header>
+    
+    <main class="content">
+        <img src="https://i.ibb.co/gMyP6HYn/IMG-4097.png" alt="Пусто" class="empty-image">
+        <h2 class="empty-title">Пустовато тут…</h2>
+        <p class="empty-desc">Думаю, самое время это исправить!</p>
+    </main>
 
     <script>
-        document.addEventListener('DOMContentLoaded', function() {
+        document.addEventListener('DOMContentLoaded', () => {
             const addButton = document.getElementById('addButton');
             const tooltip = document.getElementById('tooltip');
-            const optionButtons = document.querySelectorAll('.option');
-            let tooltipVisible = false;
+            const options = document.querySelectorAll('.option');
+            let visible = false;
             
-            // Показать/скрыть подсказку с анимацией
-            addButton.addEventListener('click', function(event) {
-                event.preventDefault();
-                event.stopPropagation();
-                
-                if (!tooltipVisible) {
-                    // Сначала сбрасываем трансформацию для анимации
-                    tooltip.style.transform = 'translateX(-50%) rotateX(20deg) scale(0.9)';
-                    tooltip.style.opacity = '0';
-                    
-                    // Даем браузеру время обновить стили
-                    setTimeout(() => {
-                        tooltip.classList.add('show');
-                        tooltipVisible = true;
-                    }, 10);
-                    
-                    console.log('Подсказка показана с анимацией');
-                } else {
-                    tooltip.classList.remove('show');
-                    tooltipVisible = false;
-                    console.log('Подсказка скрыта');
-                }
+            addButton.addEventListener('click', (e) => {
+                e.preventDefault(); e.stopPropagation();
+                visible = !visible;
+                tooltip.classList.toggle('show', visible);
+                console.log(visible ? 'Подсказка показана' : 'Подсказка скрыта');
             });
             
-            // Закрыть подсказку при клике на опцию
-            optionButtons.forEach(button => {
-                button.addEventListener('click', function(event) {
-                    event.preventDefault();
-                    event.stopPropagation();
-                    
-                    const type = this.getAttribute('data-type');
-                    console.log(`Выбран тип: ${type}`);
-                    
-                    // Закрываем подсказку
-                    tooltip.classList.remove('show');
-                    tooltipVisible = false;
-                });
-            });
+            options.forEach(btn => btn.addEventListener('click', (e) => {
+                e.preventDefault(); e.stopPropagation();
+                console.log(`Выбран: ${btn.getAttribute('data-type')}`);
+                tooltip.classList.remove('show');
+                visible = false;
+            }));
             
-            // Закрыть подсказку при клике вне её
-            document.addEventListener('click', function(event) {
-                if (tooltipVisible && 
-                    !tooltip.contains(event.target) && 
-                    !addButton.contains(event.target)) {
+            document.addEventListener('click', (e) => {
+                if (visible && !tooltip.contains(e.target) && !addButton.contains(e.target)) {
                     tooltip.classList.remove('show');
-                    tooltipVisible = false;
-                    console.log('Подсказка скрыта (клик вне)');
+                    visible = false;
                 }
             });
-            
-            // Добавляем стили для точного соответствия требованиям
-            const style = document.createElement('style');
-            style.textContent = `
-                /* Дополнительные стили для точности */
-                .header {
-                    background-color: transparent !important;
-                    border-bottom: none !important;
-                }
-                
-                /* Точное позиционирование */
-                .header {
-                    top: 5px !important;
-                    padding-top: 5px !important;
-                }
-                
-                .add-button:focus {
-                    outline: none;
-                }
-                
-                /* Убираем hover эффекты у основной кнопки */
-                .add-button:hover,
-                .add-button:active {
-                    background-color: #2a2a2c !important;
-                    transform: none !important;
-                }
-                
-                /* Усиленная пружинная анимация */
-                .tooltip {
-                    transition: all 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) !important;
-                    transform: translateX(-50%) rotateX(20deg) scale(0.9);
-                    opacity: 0;
-                }
-                
-                .tooltip.show {
-                    transform: translateX(-50%) rotateX(0deg) scale(1) !important;
-                    opacity: 1 !important;
-                }
-                
-                /* Плавный хвостик */
-                .tooltip::before {
-                    transition: all 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
-                }
-                
-                .tooltip.show::before {
-                    opacity: 1;
-                }
-                
-                body {
-                    -webkit-font-smoothing: antialiased;
-                    -moz-osx-font-smoothing: grayscale;
-                    text-rendering: optimizeLegibility;
-                }
-            `;
-            document.head.appendChild(style);
         });
     </script>
 </body>
