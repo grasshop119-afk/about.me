@@ -14,9 +14,9 @@
         }
 
         .header {
-            position: fixed; top: 45px; left: 0; right: 0;
-            background: transparent; z-index: 100;
+            position: fixed; top: 50px; left: 0; right: 0;
             display: flex; align-items: center; justify-content: center;
+            z-index: 100;
         }
 
         .title {
@@ -41,7 +41,7 @@
             background: rgba(28, 28, 30, 0.85); backdrop-filter: blur(20px);
             border-radius: 14px; padding: 16px; width: 280px;
             opacity: 0; visibility: hidden; z-index: 1000;
-            transition: all 0.3s cubic-bezier(0.5, 2, 0.5, 1);
+            transition: all 0.4s cubic-bezier(0.5, 2, 0.5, 1);
             box-shadow: 0 12px 32px rgba(0, 0, 0, 0.4);
         }
 
@@ -50,14 +50,25 @@
             transform: translateX(-50%); width: 16px; height: 8px;
             background: rgba(28, 28, 30, 0.85); clip-path: polygon(50% 0%, 0% 100%, 100% 100%);
             backdrop-filter: blur(20px); opacity: 0;
-            transition: opacity 0.2s ease 0.1s;
+            transition: opacity 0.3s ease 0.15s;
         }
 
-        .tooltip.show { opacity: 1; visibility: visible; transform: translateX(-50%) scale(1); }
+        .tooltip.show { 
+            opacity: 1; visibility: visible; 
+            transform: translateX(-50%) scale(1); 
+        }
+        
         .tooltip.show::before { opacity: 1; }
 
-        .tooltip-title { font-size: 17px; font-weight: 600; color: #f5f5f7; margin-bottom: 6px; }
-        .tooltip-desc { font-size: 13px; color: rgba(245, 245, 247, 0.7); margin-bottom: 16px; }
+        .tooltip-title { 
+            font-size: 17px; font-weight: 600; 
+            color: #f5f5f7; margin-bottom: 6px; 
+        }
+        
+        .tooltip-desc { 
+            font-size: 13px; color: rgba(245, 245, 247, 0.7); 
+            margin-bottom: 16px; 
+        }
 
         .options { display: flex; flex-direction: column; gap: 10px; }
         
@@ -67,24 +78,159 @@
             cursor: pointer; backdrop-filter: blur(10px);
         }
 
+        /* Модальное окно */
+        .modal-overlay {
+            position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0, 0, 0, 0.4); backdrop-filter: blur(4px);
+            z-index: 1000; opacity: 0; visibility: hidden;
+            transition: opacity 0.3s ease;
+        }
+
+        .modal-overlay.show {
+            opacity: 1; visibility: visible;
+        }
+
+        .modal {
+            position: fixed; bottom: 0; left: 0; right: 0;
+            height: 95vh; max-height: 95vh;
+            background: #1c1c1e;
+            z-index: 1001;
+            transform: translateY(100%);
+            transition: transform 0.4s ease;
+            padding: 20px;
+            overflow-y: auto;
+            border-radius: 30px 30px 0 0;
+        }
+
+        .modal.show {
+            transform: translateY(0);
+        }
+
+        .modal-header {
+            display: flex; align-items: center; justify-content: center;
+            margin-bottom: 24px; position: relative;
+        }
+
+        .modal-title {
+            font-size: 20px; font-weight: 600;
+            color: #f5f5f7; letter-spacing: -0.015em;
+        }
+
+        .close-button {
+            background: #2a2a2c; width: 28px; height: 28px;
+            border-radius: 50%; border: none; cursor: pointer;
+            display: flex; align-items: center; justify-content: center;
+            position: absolute; right: 0;
+        }
+
+        .close-button img {
+            width: 12px; height: 12px; filter: invert(0.9);
+        }
+
+        .form-group {
+            margin-bottom: 28px;
+        }
+
+        .form-label {
+            font-size: 14px; font-weight: 500;
+            color: rgba(245, 245, 247, 0.8); margin-bottom: 8px;
+            display: block;
+        }
+
+        .input-field {
+            width: 100%; background: rgba(44, 44, 46, 0.8);
+            border: 1px solid transparent; border-radius: 10px;
+            padding: 12px 14px; font-size: 16px; 
+            color: #f5f5f7; font-family: inherit;
+            transition: border-color 0.2s ease; height: 44px;
+        }
+
+        .input-field:focus {
+            outline: none; border-color: #007AFF;
+        }
+
+        .input-field::placeholder {
+            color: rgba(245, 245, 247, 0.5);
+        }
+
+        .common-desc {
+            font-size: 13px; color: rgba(245, 245, 247, 0.5);
+            line-height: 1.4; margin-top: 8px;
+        }
+
+        .emoji-section {
+            margin-top: 32px;
+        }
+
+        .emoji-label {
+            font-size: 14px; font-weight: 500;
+            color: rgba(245, 245, 247, 0.8); margin-bottom: 12px;
+            display: block;
+        }
+
+        .emoji-container {
+            display: flex; gap: 12px; overflow-x: auto;
+            padding-bottom: 8px;
+        }
+
+        .emoji-container::-webkit-scrollbar {
+            height: 4px;
+        }
+
+        .emoji-container::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 2px;
+        }
+
+        .emoji-container::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.3);
+            border-radius: 2px;
+        }
+
+        .emoji-item {
+            flex: 0 0 auto; width: 80px; height: 80px;
+            background: rgba(44, 44, 46, 0.8); border-radius: 12px;
+            display: flex; flex-direction: column; align-items: center;
+            justify-content: center; cursor: pointer; transition: all 0.2s ease;
+        }
+
+        .emoji-item.selected {
+            background: rgba(0, 122, 255, 0.2);
+        }
+
+        .emoji-icon {
+            font-size: 28px; margin-bottom: 6px;
+        }
+
+        .emoji-name {
+            font-size: 12px; color: rgba(245, 245, 247, 0.9);
+            text-align: center;
+        }
+
         .content {
             display: flex; flex-direction: column; align-items: center;
             justify-content: center; min-height: 100vh; text-align: center;
-            padding-top: 100px;
+            padding-top: 120px;
         }
 
-        .empty-image { width: 200px; height: 200px; margin-bottom: 30px; }
-        .empty-title { font-size: 28px; font-weight: 500; color: #f5f5f7; margin-bottom: 12px; }
-        .empty-desc { font-size: 17px; color: rgba(245, 245, 247, 0.7); max-width: 300px; }
-
-        .badge {
-            position: fixed; top: 3px; left: 50%; transform: translateX(-50%);
-            background: #007AFF; color: #fff; font-size: 13px; font-weight: 500;
-            padding: 4px 12px; border-radius: 980px; z-index: 101;
+        .empty-image { 
+            width: 200px; height: 200px; margin-bottom: 30px; 
+        }
+        
+        .empty-title { 
+            font-size: 28px; font-weight: 500; 
+            color: #f5f5f7; margin-bottom: 12px; 
+        }
+        
+        .empty-desc { 
+            font-size: 17px; color: rgba(245, 245, 247, 0.7); 
+            max-width: 300px; 
         }
 
         @media (max-width: 768px) {
             .tooltip { width: 260px; }
+            .modal { padding: 16px; border-radius: 24px 24px 0 0; }
+            .emoji-item { width: 70px; height: 70px; }
             .empty-image { width: 180px; height: 180px; }
             .empty-title { font-size: 24px; }
             .empty-desc { font-size: 16px; max-width: 280px; }
@@ -92,8 +238,6 @@
     </style>
 </head>
 <body>
-    <div class="badge">Вишлист</div>
-    
     <header class="header">
         <h1 class="title">Вишлист</h1>
         <button class="add-button" id="addButton">
@@ -115,32 +259,129 @@
         <p class="empty-desc">Думаю, самое время это исправить!</p>
     </main>
 
+    <!-- Модальное окно -->
+    <div class="modal-overlay" id="modalOverlay"></div>
+    <div class="modal" id="modal">
+        <div class="modal-header">
+            <h2 class="modal-title" id="modalTitle">Тип листа</h2>
+            <button class="close-button" id="closeButton">
+                <img src="https://img.icons8.com/?size=100&id=95834&format=png&color=000000" alt="×">
+            </button>
+        </div>
+        
+        <div class="form-group">
+            <label class="form-label">Назови свой лист</label>
+            <input type="text" class="input-field" placeholder="Название">
+            <p class="common-desc">
+                Просто и понятно назови свой список, чтобы легко его находить
+            </p>
+        </div>
+
+        <div class="emoji-section">
+            <label class="emoji-label">Выбери эмодзи</label>
+            <div class="emoji-container" id="emojiContainer">
+                <!-- Эмодзи будут добавлены через JS -->
+            </div>
+        </div>
+    </div>
+
     <script>
         document.addEventListener('DOMContentLoaded', () => {
             const addButton = document.getElementById('addButton');
             const tooltip = document.getElementById('tooltip');
             const options = document.querySelectorAll('.option');
-            let visible = false;
+            const modalOverlay = document.getElementById('modalOverlay');
+            const modal = document.getElementById('modal');
+            const modalTitle = document.getElementById('modalTitle');
+            const closeButton = document.getElementById('closeButton');
+            const emojiContainer = document.getElementById('emojiContainer');
+            
+            let tooltipVisible = false;
+            let selectedEmoji = 'snowflake';
+            
+            const emojis = [
+                { id: 'snowflake', emoji: '❄️', name: 'Снежинка' },
+                { id: 'christmas', emoji: '🎄', name: 'X-mass' },
+                { id: 'fire', emoji: '🔥', name: 'Огонюка' },
+                { id: 'zap', emoji: '⚡️', name: 'Пфпфф' },
+                { id: 'tada', emoji: '🎉', name: 'Ура' },
+                { id: 'trophy', emoji: '🏆', name: 'Кубок' },
+                { id: 'gamepad', emoji: '🎮', name: 'Геймпад' },
+                { id: 'heart', emoji: '❤️', name: 'Сердце' },
+                { id: 'star', emoji: '⭐️', name: 'Звезда' },
+                { id: 'moon', emoji: '🌙', name: 'Луна' },
+                { id: 'sun', emoji: '☀️', name: 'Солнце' },
+                { id: 'cat', emoji: '😺', name: 'Котик' },
+                { id: 'book', emoji: '📚', name: 'Книги' },
+                { id: 'music', emoji: '🎵', name: 'Музыка' },
+                { id: 'plane', emoji: '✈️', name: 'Путешествие' }
+            ];
+            
+            // Создаем эмодзи
+            emojis.forEach(emoji => {
+                const item = document.createElement('div');
+                item.className = `emoji-item ${emoji.id === selectedEmoji ? 'selected' : ''}`;
+                item.dataset.id = emoji.id;
+                
+                item.innerHTML = `
+                    <div class="emoji-icon">${emoji.emoji}</div>
+                    <div class="emoji-name">${emoji.name}</div>
+                `;
+                
+                item.addEventListener('click', () => {
+                    document.querySelectorAll('.emoji-item').forEach(el => {
+                        el.classList.remove('selected');
+                    });
+                    item.classList.add('selected');
+                    selectedEmoji = emoji.id;
+                    console.log(`Выбран эмодзи: ${emoji.name}`);
+                });
+                
+                emojiContainer.appendChild(item);
+            });
             
             addButton.addEventListener('click', (e) => {
                 e.preventDefault(); e.stopPropagation();
-                visible = !visible;
-                tooltip.classList.toggle('show', visible);
-                console.log(visible ? 'Подсказка показана' : 'Подсказка скрыта');
+                tooltipVisible = !tooltipVisible;
+                tooltip.classList.toggle('show', tooltipVisible);
             });
             
             options.forEach(btn => btn.addEventListener('click', (e) => {
                 e.preventDefault(); e.stopPropagation();
-                console.log(`Выбран: ${btn.getAttribute('data-type')}`);
+                
+                const type = btn.getAttribute('data-type');
+                const typeName = type === 'classic' ? 'Классический' : 'Целевой';
+                
                 tooltip.classList.remove('show');
-                visible = false;
+                tooltipVisible = false;
+                
+                setTimeout(() => {
+                    modalTitle.textContent = typeName;
+                    modalOverlay.classList.add('show');
+                    
+                    setTimeout(() => {
+                        modal.classList.add('show');
+                    }, 10);
+                    
+                }, 300);
             }));
             
             document.addEventListener('click', (e) => {
-                if (visible && !tooltip.contains(e.target) && !addButton.contains(e.target)) {
+                if (tooltipVisible && !tooltip.contains(e.target) && !addButton.contains(e.target)) {
                     tooltip.classList.remove('show');
-                    visible = false;
+                    tooltipVisible = false;
                 }
+            });
+            
+            closeButton.addEventListener('click', () => {
+                modal.classList.remove('show');
+                setTimeout(() => {
+                    modalOverlay.classList.remove('show');
+                }, 300);
+            });
+            
+            modalOverlay.addEventListener('click', () => {
+                closeButton.click();
             });
         });
     </script>
