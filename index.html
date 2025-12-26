@@ -14,7 +14,7 @@
         }
 
         .header {
-            position: fixed; top: 50px; left: 0; right: 0;
+            position: fixed; top: 55px; left: 0; right: 0;
             display: flex; align-items: center; justify-content: center;
             z-index: 100;
         }
@@ -78,12 +78,44 @@
             cursor: pointer; backdrop-filter: blur(10px);
         }
 
-        /* Модальное окно */
+        /* Плашка созданного листа */
+        .list-card {
+            position: fixed; top: 110px; left: 50%; transform: translateX(-50%);
+            background: #2a2a2c; border-radius: 14px; padding: 16px;
+            width: calc(100% - 48px); max-width: 600px; z-index: 999;
+            display: none; align-items: center; gap: 16px;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+        }
+
+        .list-card.show {
+            display: flex;
+        }
+
+        .list-emoji-box {
+            width: 44px; height: 44px; background: #3a3a3c;
+            border-radius: 10px; display: flex; align-items: center;
+            justify-content: center; font-size: 24px; flex-shrink: 0;
+        }
+
+        .list-info {
+            flex: 1;
+        }
+
+        .list-name {
+            font-size: 17px; font-weight: 600; color: #f5f5f7;
+            margin-bottom: 2px;
+        }
+
+        .list-status {
+            font-size: 13px; color: rgba(245, 245, 247, 0.5);
+        }
+
+        /* Модальное окно создания */
         .modal-overlay {
             position: fixed; top: 0; left: 0; right: 0; bottom: 0;
             background: rgba(0, 0, 0, 0.4); backdrop-filter: blur(4px);
             z-index: 1000; opacity: 0; visibility: hidden;
-            transition: opacity 0.3s ease;
+            transition: opacity 0.2s ease;
         }
 
         .modal-overlay.show {
@@ -98,8 +130,8 @@
             transform: translateY(100%);
             transition: transform 0.4s ease;
             padding: 20px;
-            overflow-y: auto;
             border-radius: 30px 30px 0 0;
+            display: flex; flex-direction: column;
         }
 
         .modal.show {
@@ -111,20 +143,64 @@
             margin-bottom: 24px; position: relative;
         }
 
+        .modal-title-wrapper {
+            display: flex; align-items: center; gap: 8px;
+            position: relative;
+        }
+
         .modal-title {
             font-size: 20px; font-weight: 600;
             color: #f5f5f7; letter-spacing: -0.015em;
         }
 
+        .modal-info-button {
+            background: #2a2a2c; width: 24px; height: 24px;
+            border-radius: 50%; border: none; cursor: pointer;
+            display: flex; align-items: center; justify-content: center;
+        }
+
+        .modal-info-button img {
+            width: 12px; height: 12px; filter: invert(0.9);
+        }
+
+        .modal-info-tooltip {
+            position: absolute; top: calc(100% + 8px); left: 50%;
+            transform: translateX(-50%) scale(0.9);
+            background: rgba(28, 28, 30, 0.85); backdrop-filter: blur(20px);
+            border-radius: 14px; padding: 16px; width: 260px;
+            opacity: 0; visibility: hidden; z-index: 1002;
+            transition: all 0.4s cubic-bezier(0.5, 2, 0.5, 1);
+            box-shadow: 0 12px 32px rgba(0, 0, 0, 0.4);
+        }
+
+        .modal-info-tooltip::before {
+            content: ''; position: absolute; top: -8px; left: 50%;
+            transform: translateX(-50%); width: 16px; height: 8px;
+            background: rgba(28, 28, 30, 0.85); clip-path: polygon(50% 0%, 0% 100%, 100% 100%);
+            backdrop-filter: blur(20px); opacity: 0;
+            transition: opacity 0.3s ease 0.15s;
+        }
+
+        .modal-info-tooltip.show { 
+            opacity: 1; visibility: visible; 
+            transform: translateX(-50%) scale(1); 
+        }
+        
+        .modal-info-tooltip.show::before { opacity: 1; }
+
         .close-button {
-            background: #2a2a2c; width: 28px; height: 28px;
+            background: #2a2a2c; width: 32px; height: 32px;
             border-radius: 50%; border: none; cursor: pointer;
             display: flex; align-items: center; justify-content: center;
             position: absolute; right: 0;
         }
 
         .close-button img {
-            width: 12px; height: 12px; filter: invert(0.9);
+            width: 16px; height: 16px; filter: invert(0.9);
+        }
+
+        .modal-content {
+            flex: 1; overflow-y: auto; padding-bottom: 20px;
         }
 
         .form-group {
@@ -207,10 +283,77 @@
             text-align: center;
         }
 
+        .emoji-desc {
+            font-size: 13px; color: rgba(245, 245, 247, 0.5);
+            line-height: 1.4; margin-top: 12px;
+        }
+
+        .create-button {
+            background: #007AFF; color: #ffffff;
+            font-size: 17px; font-weight: 600; padding: 12px;
+            border: none; border-radius: 12px; cursor: pointer;
+            margin-top: auto; width: 100%; transition: opacity 0.2s ease;
+            flex-shrink: 0;
+        }
+
+        /* Модалка листа (на весь экран) */
+        .list-modal {
+            position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+            background: #000; z-index: 1100; transform: translateY(100%);
+            transition: transform 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            display: flex; flex-direction: column;
+        }
+
+        .list-modal.show {
+            transform: translateY(0);
+        }
+
+        .list-modal-header {
+            display: flex; align-items: center; gap: 16px;
+            padding: 20px; border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .back-button {
+            background: #2a2a2c; width: 32px; height: 32px;
+            border-radius: 50%; border: none; cursor: pointer;
+            display: flex; align-items: center; justify-content: center;
+            flex-shrink: 0;
+        }
+
+        .back-button img {
+            width: 16px; height: 16px; filter: invert(0.9);
+        }
+
+        .list-modal-title {
+            font-size: 20px; font-weight: 600;
+            color: #f5f5f7; letter-spacing: -0.015em;
+        }
+
+        .list-modal-content {
+            flex: 1; padding: 20px; overflow-y: auto;
+            display: flex; flex-direction: column; align-items: center;
+            justify-content: center; text-align: center;
+        }
+
+        .list-empty-image { 
+            width: 200px; height: 200px; margin-bottom: 30px; 
+            opacity: 0.7;
+        }
+        
+        .list-empty-title { 
+            font-size: 28px; font-weight: 500; 
+            color: #f5f5f7; margin-bottom: 12px; 
+        }
+        
+        .list-empty-desc { 
+            font-size: 17px; color: rgba(245, 245, 247, 0.7); 
+            max-width: 300px; 
+        }
+
         .content {
             display: flex; flex-direction: column; align-items: center;
             justify-content: center; min-height: 100vh; text-align: center;
-            padding-top: 120px;
+            padding-top: 125px;
         }
 
         .empty-image { 
@@ -229,7 +372,9 @@
 
         @media (max-width: 768px) {
             .tooltip { width: 260px; }
+            .modal-info-tooltip { width: 240px; }
             .modal { padding: 16px; border-radius: 24px 24px 0 0; }
+            .list-card { width: calc(100% - 32px); top: 100px; }
             .emoji-item { width: 70px; height: 70px; }
             .empty-image { width: 180px; height: 180px; }
             .empty-title { font-size: 24px; }
@@ -253,35 +398,78 @@
         </div>
     </header>
     
+    <!-- Плашка созданного листа -->
+    <div class="list-card" id="listCard">
+        <div class="list-emoji-box" id="listEmojiBox">❄️</div>
+        <div class="list-info">
+            <div class="list-name" id="listName">Название листа</div>
+            <div class="list-status" id="listStatus">Пусто</div>
+        </div>
+    </div>
+    
     <main class="content">
         <img src="https://i.ibb.co/gMyP6HYn/IMG-4097.png" alt="Пусто" class="empty-image">
         <h2 class="empty-title">Пустовато тут…</h2>
         <p class="empty-desc">Думаю, самое время это исправить!</p>
     </main>
 
-    <!-- Модальное окно -->
+    <!-- Модальное окно создания -->
     <div class="modal-overlay" id="modalOverlay"></div>
     <div class="modal" id="modal">
         <div class="modal-header">
-            <h2 class="modal-title" id="modalTitle">Тип листа</h2>
+            <div class="modal-title-wrapper">
+                <h2 class="modal-title" id="modalTitle">Тип листа</h2>
+                <button class="modal-info-button" id="modalInfoButton" style="display: none;">
+                    <img src="https://img.icons8.com/?size=100&id=85965&format=png&color=000000" alt="?">
+                </button>
+                <div class="modal-info-tooltip" id="modalInfoTooltip">
+                    <div class="tooltip-title">Что это?</div>
+                    <div class="tooltip-desc">В целевых листах, в отличие от классических, можно задавать сроки и ставить цели. Попробуй, это удобно!</div>
+                </div>
+            </div>
             <button class="close-button" id="closeButton">
                 <img src="https://img.icons8.com/?size=100&id=95834&format=png&color=000000" alt="×">
             </button>
         </div>
         
-        <div class="form-group">
-            <label class="form-label">Назови свой лист</label>
-            <input type="text" class="input-field" placeholder="Название">
-            <p class="common-desc">
-                Просто и понятно назови свой список, чтобы легко его находить
-            </p>
+        <div class="modal-content">
+            <div class="form-group">
+                <label class="form-label">Назови свой лист</label>
+                <input type="text" class="input-field" id="listNameInput" placeholder="Название">
+                <p class="common-desc">
+                    Просто и понятно назови свой список, чтобы легко его находить. 
+                    Например: «Книги для чтения», «Новая техника» или «Подарки на день рождения»
+                </p>
+            </div>
+
+            <div class="emoji-section">
+                <label class="emoji-label">Выбери эмодзи</label>
+                <div class="emoji-container" id="emojiContainer">
+                    <!-- Эмодзи будут добавлены через JS -->
+                </div>
+                <p class="emoji-desc">
+                    Эмодзи сделает твой лист узнаваемым и добавит немного настроения. 
+                    Он будет отображаться рядом с названием в списке твоих вишлистов
+                </p>
+            </div>
         </div>
 
-        <div class="emoji-section">
-            <label class="emoji-label">Выбери эмодзи</label>
-            <div class="emoji-container" id="emojiContainer">
-                <!-- Эмодзи будут добавлены через JS -->
-            </div>
+        <button class="create-button" id="createButton">Создать</button>
+    </div>
+
+    <!-- Модалка листа (на весь экран) -->
+    <div class="list-modal" id="listModal">
+        <div class="list-modal-header">
+            <button class="back-button" id="backButton">
+                <img src="https://img.icons8.com/?size=100&id=6bqVyNW4zQtX&format=png&color=000000" alt="←">
+            </button>
+            <h2 class="list-modal-title" id="listModalTitle">Название листа</h2>
+        </div>
+        
+        <div class="list-modal-content">
+            <img src="https://i.ibb.co/gMyP6HYn/IMG-4097.png" alt="Пусто" class="list-empty-image">
+            <h2 class="list-empty-title">Пустовато тут…</h2>
+            <p class="list-empty-desc">Думаю, самое время это исправить!</p>
         </div>
     </div>
 
@@ -293,11 +481,28 @@
             const modalOverlay = document.getElementById('modalOverlay');
             const modal = document.getElementById('modal');
             const modalTitle = document.getElementById('modalTitle');
+            const modalInfoButton = document.getElementById('modalInfoButton');
+            const modalInfoTooltip = document.getElementById('modalInfoTooltip');
             const closeButton = document.getElementById('closeButton');
+            const createButton = document.getElementById('createButton');
             const emojiContainer = document.getElementById('emojiContainer');
+            const listNameInput = document.getElementById('listNameInput');
+            
+            // Плашка созданного листа
+            const listCard = document.getElementById('listCard');
+            const listEmojiBox = document.getElementById('listEmojiBox');
+            const listName = document.getElementById('listName');
+            const listStatus = document.getElementById('listStatus');
+            
+            // Модалка листа
+            const listModal = document.getElementById('listModal');
+            const backButton = document.getElementById('backButton');
+            const listModalTitle = document.getElementById('listModalTitle');
             
             let tooltipVisible = false;
+            let modalInfoTooltipVisible = false;
             let selectedEmoji = 'snowflake';
+            let selectedEmojiSymbol = '❄️';
             
             const emojis = [
                 { id: 'snowflake', emoji: '❄️', name: 'Снежинка' },
@@ -307,14 +512,13 @@
                 { id: 'tada', emoji: '🎉', name: 'Ура' },
                 { id: 'trophy', emoji: '🏆', name: 'Кубок' },
                 { id: 'gamepad', emoji: '🎮', name: 'Геймпад' },
-                { id: 'heart', emoji: '❤️', name: 'Сердце' },
-                { id: 'star', emoji: '⭐️', name: 'Звезда' },
-                { id: 'moon', emoji: '🌙', name: 'Луна' },
-                { id: 'sun', emoji: '☀️', name: 'Солнце' },
-                { id: 'cat', emoji: '😺', name: 'Котик' },
-                { id: 'book', emoji: '📚', name: 'Книги' },
-                { id: 'music', emoji: '🎵', name: 'Музыка' },
-                { id: 'plane', emoji: '✈️', name: 'Путешествие' }
+                { id: 'heart', emoji: '❤️', name: 'Любоф' },
+                { id: 'robot', emoji: '🤖', name: 'Бип-Бип' },
+                { id: 'ghost', emoji: '👻', name: 'Пугало' },
+                { id: 'anatomical', emoji: '🫀', name: 'Сердце' },
+                { id: 'headphones', emoji: '🎧', name: 'Наушники' },
+                { id: 'masks', emoji: '🎭', name: 'Маски' },
+                { id: 'car', emoji: '🚗', name: 'Машинка' }
             ];
             
             // Создаем эмодзи
@@ -322,6 +526,7 @@
                 const item = document.createElement('div');
                 item.className = `emoji-item ${emoji.id === selectedEmoji ? 'selected' : ''}`;
                 item.dataset.id = emoji.id;
+                item.dataset.emoji = emoji.emoji;
                 
                 item.innerHTML = `
                     <div class="emoji-icon">${emoji.emoji}</div>
@@ -334,6 +539,7 @@
                     });
                     item.classList.add('selected');
                     selectedEmoji = emoji.id;
+                    selectedEmojiSymbol = emoji.emoji;
                     console.log(`Выбран эмодзи: ${emoji.name}`);
                 });
                 
@@ -346,6 +552,13 @@
                 tooltip.classList.toggle('show', tooltipVisible);
             });
             
+            // Показ/скрытие подсказки в модалке
+            modalInfoButton.addEventListener('click', (e) => {
+                e.preventDefault(); e.stopPropagation();
+                modalInfoTooltipVisible = !modalInfoTooltipVisible;
+                modalInfoTooltip.classList.toggle('show', modalInfoTooltipVisible);
+            });
+            
             options.forEach(btn => btn.addEventListener('click', (e) => {
                 e.preventDefault(); e.stopPropagation();
                 
@@ -354,9 +567,19 @@
                 
                 tooltip.classList.remove('show');
                 tooltipVisible = false;
+                modalInfoTooltip.classList.remove('show');
+                modalInfoTooltipVisible = false;
                 
                 setTimeout(() => {
                     modalTitle.textContent = typeName;
+                    
+                    // Показываем кнопку с вопросом только для целевых листов
+                    if (type === 'target') {
+                        modalInfoButton.style.display = 'flex';
+                    } else {
+                        modalInfoButton.style.display = 'none';
+                    }
+                    
                     modalOverlay.classList.add('show');
                     
                     setTimeout(() => {
@@ -371,17 +594,68 @@
                     tooltip.classList.remove('show');
                     tooltipVisible = false;
                 }
+                
+                if (modalInfoTooltipVisible && !modalInfoTooltip.contains(e.target) && !modalInfoButton.contains(e.target)) {
+                    modalInfoTooltip.classList.remove('show');
+                    modalInfoTooltipVisible = false;
+                }
             });
             
+            // Закрытие модалки создания
             closeButton.addEventListener('click', () => {
                 modal.classList.remove('show');
-                setTimeout(() => {
-                    modalOverlay.classList.remove('show');
-                }, 300);
+                modalOverlay.classList.remove('show');
+                modalInfoTooltip.classList.remove('show');
+                modalInfoTooltipVisible = false;
             });
             
             modalOverlay.addEventListener('click', () => {
                 closeButton.click();
+            });
+            
+            // Кнопка создания листа
+            createButton.addEventListener('click', (e) => {
+                e.preventDefault();
+                
+                const listNameValue = listNameInput.value.trim() || 'Новый лист';
+                
+                // Закрываем модалку создания
+                modal.classList.remove('show');
+                modalOverlay.classList.remove('show');
+                modalInfoTooltip.classList.remove('show');
+                modalInfoTooltipVisible = false;
+                
+                // Показываем плашку созданного листа
+                listEmojiBox.textContent = selectedEmojiSymbol;
+                listName.textContent = listNameValue;
+                listStatus.textContent = 'Пусто';
+                listModalTitle.textContent = listNameValue;
+                
+                setTimeout(() => {
+                    listCard.classList.add('show');
+                    
+                    // Через 0.5 секунд меняем статус на "Загрузка"
+                    setTimeout(() => {
+                        listStatus.textContent = 'Загрузка';
+                        
+                        // Через 0.75 секунд открываем модалку листа
+                        setTimeout(() => {
+                            listCard.classList.remove('show');
+                            listModal.classList.add('show');
+                        }, 750);
+                        
+                    }, 500);
+                    
+                }, 300);
+            });
+            
+            // Кнопка возврата из модалки листа
+            backButton.addEventListener('click', () => {
+                listModal.classList.remove('show');
+                // Показываем плашку снова при возврате
+                setTimeout(() => {
+                    listCard.classList.add('show');
+                }, 300);
             });
         });
     </script>
